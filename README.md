@@ -7,6 +7,9 @@ This is a fork of the [TimedMediaHandler](https://www.mediawiki.org/wiki/Extensi
 * No embedding videos in iframes/modals/popovers
 * Removed support for TimedText and closed captioning
 * Removed `ogv.js` compatibility shim
+* Added `autoplay` parameter for files: when enabled, autoplays and mutes media
+* Added `nocontrols` parameter for files: when enabled, shows no controls
+* Video transcoding is disabled by default (change `$wgEnabledTranscodeSet` to enable)
 
 ## Rationale behind this fork
 

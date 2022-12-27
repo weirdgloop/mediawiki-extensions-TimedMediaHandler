@@ -60,6 +60,12 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	/** @var bool */
 	protected $loop;
 
+	/** @var bool */
+	protected $autoPlay;
+
+	/** @var bool */
+	protected $noControls;
+
 	// The prefix for player ids
 	private const PLAYER_ID_PREFIX = 'mwe_player_';
 
@@ -85,6 +91,8 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$this->inline = $conf['inline'] ?? false;
 		$this->muted = $conf['muted'] ?? false;
 		$this->loop = $conf['loop'] ?? false;
+		$this->autoPlay = $conf['autoplay'] ?? false;
+		$this->noControls = $conf['nocontrols'] ?? false;
 	}
 
 	/**
@@ -372,17 +380,18 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			// Get the correct size:
 			'poster' => $this->getUrl( $sizeOverride ),
 
-			// Note we set controls to true ( for no-js players )
-			// When ext.tmh.player.element.js runs it replaces the native player controls
-			'controls' => 'true',
-
 			// Since we will reload the item with javascript,
 			// tell browser to not load the video before
 			'preload' => 'none',
 		];
 
-		if ( $autoPlay ) {
+		if ( $this->autoPlay || $autoPlay ) {
 			$mediaAttr['autoplay'] = 'true';
+			$mediaAttr['muted'] = 'true';
+		}
+
+		if ( !$this->noControls ) {
+			$mediaAttr['controls'] = 'true';
 		}
 
 		if ( !$this->isVideo ) {
