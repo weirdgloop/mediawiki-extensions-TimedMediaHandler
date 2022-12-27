@@ -3,6 +3,7 @@
 	"namemsg": "timedmediahandler-extensionname",
 	"version": "0.6.0",
 	"author": [
+		"[https://github.com/jayktaylor Jayden Bailey]",
 		"Michael Dale",
 		"Jan Gerber",
 		"Derk-Jan Hartman",
@@ -10,7 +11,7 @@
 		"Tim Starling",
 		"..."
 	],
-	"url": "https://www.mediawiki.org/wiki/Extension:TimedMediaHandler",
+	"url": "https://github.com/weirdgloop/mediawiki-extensions-TimedMediaHandler",
 	"descriptionmsg": "timedmediahandler-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "media",
@@ -18,15 +19,6 @@
 		"MediaWiki": ">= 1.38.0"
 	},
 	"APIModules": {
-		"timedtext": {
-			"class": "MediaWiki\\TimedMediaHandler\\ApiTimedText",
-			"services": [
-				"LanguageNameUtils",
-				"RepoGroup",
-				"MainWANObjectCache",
-				"WikiPageFactory"
-			]
-		},
 		"transcodereset": {
 			"class": "MediaWiki\\TimedMediaHandler\\ApiTranscodeReset",
 			"services": [
@@ -72,7 +64,6 @@
 		"timedmediahandler"
 	],
 	"SpecialPages": {
-		"OrphanedTimedText": "MediaWiki\\TimedMediaHandler\\SpecialOrphanedTimedText",
 		"TranscodeStatistics": "MediaWiki\\TimedMediaHandler\\SpecialTranscodeStatistics"
 	},
 	"MessagesDirs": {
@@ -105,23 +96,14 @@
 		"MockOggHandler": "tests/phpunit/mocks/MockOggHandler.php"
 	},
 	"Hooks": {
-		"ArticleContentOnDiff": "main",
-		"ArticleFromTitle": "main",
 		"ArticlePurge": "main",
-		"BeforePageDisplay": "main",
-		"CanonicalNamespaces": "main",
 		"FileDeleteComplete": "main",
 		"FileUpload": "main",
-		"ImageOpenShowImageInlineBefore": "main",
 		"ImagePageAfterImageLinks": "main",
-		"ImagePageFileHistoryLine": "main",
 		"LoadExtensionSchemaUpdates": "installer",
-		"MediaWikiPerformAction": "iframe",
 		"RevisionFromEditComplete": "main",
 		"ParserTestGlobals": "main",
-		"SkinTemplateNavigation::Universal": "main",
-		"TitleMove": "main",
-		"wgQueryPages": "main"
+		"TitleMove": "main"
 	},
 	"HookHandlers": {
 		"main": {
@@ -132,9 +114,6 @@
 				"SpecialPageFactory"
 			]
 		},
-		"iframe": {
-			"class": "MediaWiki\\TimedMediaHandler\\TimedMediaIframeOutput"
-		},
 		"installer": {
 			"class": "MediaWiki\\TimedMediaHandler\\InstallerHooks"
 		}
@@ -144,11 +123,6 @@
 			"description": "How long you have to wait between transcode resets for non-error transcodes",
 			"public": true,
 			"value": 3600
-		},
-		"MinimumVideoPlayerSize": {
-			"description": "The minimum size for an embed video player (smaller than this size, it uses a pop-up player)",
-			"public": true,
-			"value": 200
 		},
 		"MediaVideoTypes": {
 			"description": "Set the supported ogg codecs for video",
@@ -167,11 +141,6 @@
 				"FLAC",
 				"Opus"
 			]
-		},
-		"EnableIframeEmbed": {
-			"description": "Support iframe for remote embedding",
-			"public": true,
-			"value": true
 		},
 		"EnableTranscode": {
 			"description": "If transcoding is enabled for this wiki (if disabled, no transcode jobs are added and no transcode status is displayed). Note if remote embedding an asset we will still check if the remote repo has transcoding enabled and associated flavors for that media embed.",
@@ -222,16 +191,6 @@
 			"description": "Compatible with ffmpeg 2",
 			"value": false
 		},
-		"TimedTextNS": {
-			"description": "The NS for TimedText (registered on MediaWiki.org) https://www.mediawiki.org/wiki/Extension_namespace_registration Note that Wikimedia Commons pre-dates TimedMediaHandler, and sets this to 102.",
-			"public": true,
-			"value": 710
-		},
-		"TimedTextForeignNamespaces": {
-			"description": "Set TimedText namespace for ForeignDBViaLBRepo on a per wikiID basis like `$wgTimedTextForeignNamespaces = [ 'commonswiki' => 102 ];`.",
-			"public": true,
-			"value": []
-		},
 		"EnabledTranscodeSet": {
 			"description": "Default enabled video transcodes\n\n- If set to empty array, no derivatives will be created\n- These transcodes are *in addition to* the source file.\n- Only derivatives with smaller width than the source asset size will be created\n- Regardless of source size at least one WebM and Ogg source will be created from the $wgEnabledTranscodeSet\n- Derivative jobs are added to the MediaWiki JobQueue the first time the asset is displayed\n- Derivative should be listed min to max\n\nAllowed values:\n* Values for WebM VP8/Vorbis, our primary free/open video format supported by Chrome/Firefox/Opera natively, and plays back in Safari/IE/Edge via ogv.js:\n** 160p.webm – Very low-bitrate web streamable WebM video\n** 240p.webm – Low-bitrate web streamable WebM video\n** 360p.webm – Medium-bitrate web streamable WebM video\n** 480p.webm – Moderate-bitrate web streamable WebM video\n** 720p.webm – A high quality WebM stream\n** 1080p.webm – A full-HD high quality WebM stream\n** 1440p.webm – A 2K full high quality WebM stream\n** 2160p.webm – A 4K full high quality WebM stream\n* Values for WebM VP9, our future free/open video format:\n** 160p.vp9.webm – Very low\n** 240p.vp9.webm – Low\n** 360p.vp9.webm – A least common denominator h.264 stream; first gen iPhone, iPods, early Android etc.\n** 480p.vp9.webm – A mid range h.264 stream; mid range phones and low end tablets\n** 720p.vp9.webm – An high quality HD stream; higher end phones, tablets, smart tvs\n** 1080p.vp9.webm – A full-HD high quality stream; higher end phones, tablets, smart tvs\n** 1440p.vp9.webm – A 2K high quality stream; higher end phones, tablets, smart tvs\n** 2160p.vp9.webm – A 4K high quality stream; higher end phones, tablets, smart tvs\n* Values for MP4 H.264/AAC, the primary format for the Apple/Microsoft world. Check patent licensing issues in your country before use! Similar to WebM in quality/bitrate:\n** 160p.mp4 – Very low\n** 240p.mp4 – Low\n** 320p.mp4 – Pretty low\n** 360p.mp4 – A least common denominator h.264 stream; first gen iPhone, iPods, early Android etc.\n** 480p.mp4 – A mid range h.264 stream; mid range phones and low end tablets\n** 720p.mp4 – An high quality HD stream; higher end phones, tablets, smart tvs\n** 1080p.mp4 – A full-HD high quality stream; higher end phones, tablets, smart tvs\n** 1440p.mp4 – A 2K high quality stream; higher end phones, tablets, smart tvs\n** 2160p.mp4 – A 4K high quality stream; higher end phones, tablets, smart tvs\n* Note: Ogg video profiles have been removed as of January 2018. Use WebM output for royalty-free codec output.",
 			"public": true,
@@ -277,7 +236,7 @@
 		"TmhEnableMp4Uploads": {
 			"description": "If MP4 source assets can be ingested",
 			"public": true,
-			"value": false
+			"value": true
 		},
 		"TmhFileExtensions": {
 			"description": "List of extensions handled by Timed Media Handler since its referenced in a few places. You should not modify this variable.",
@@ -331,166 +290,6 @@
 		"remoteExtPath": "TimedMediaHandler"
 	},
 	"ResourceModules": {
-		"ext.tmh.video-js": {
-			"es6": true,
-			"scripts": "resources/videojs/alt/video.core.min.js",
-			"styles": "resources/videojs/video-js.css",
-			"noflip": true,
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"languageScripts": {
-				"ar": "resources/videojs/lang/ar.js",
-				"ba": "resources/videojs/lang/ba.js",
-				"bg": "resources/videojs/lang/bg.js",
-				"ca": "resources/videojs/lang/ca.js",
-				"cs": "resources/videojs/lang/cs.js",
-				"cy": "resources/videojs/lang/cy.js",
-				"da": "resources/videojs/lang/da.js",
-				"de": "resources/videojs/lang/de.js",
-				"el": "resources/videojs/lang/el.js",
-				"en": "resources/videojs/lang/en.js",
-				"es": "resources/videojs/lang/es.js",
-				"fa": "resources/videojs/lang/fa.js",
-				"fi": "resources/videojs/lang/fi.js",
-				"fr": "resources/videojs/lang/fr.js",
-				"gd": "resources/videojs/lang/gd.js",
-				"gl": "resources/videojs/lang/gl.js",
-				"he": "resources/videojs/lang/he.js",
-				"hi": "resources/videojs/lang/hi.js",
-				"hr": "resources/videojs/lang/hr.js",
-				"hu": "resources/videojs/lang/hu.js",
-				"it": "resources/videojs/lang/it.js",
-				"ja": "resources/videojs/lang/ja.js",
-				"ko": "resources/videojs/lang/ko.js",
-				"lv": "resources/videojs/lang/lv.js",
-				"nb": "resources/videojs/lang/nb.js",
-				"nl": "resources/videojs/lang/nl.js",
-				"nn": "resources/videojs/lang/nn.js",
-				"oc": "resources/videojs/lang/oc.js",
-				"pl": "resources/videojs/lang/pl.js",
-				"pt": "resources/videojs/lang/pt-PT.js",
-				"pt-br": "resources/videojs/lang/pt-BR.js",
-				"ro": "resources/videojs/lang/ro.js",
-				"ru": "resources/videojs/lang/ru.js",
-				"sk": "resources/videojs/lang/sk.js",
-				"sl": "resources/videojs/lang/sl.js",
-				"sr": "resources/videojs/lang/sr.js",
-				"sv": "resources/videojs/lang/sv.js",
-				"te": "resources/videojs/lang/te.js",
-				"th": "resources/videojs/lang/th.js",
-				"tr": "resources/videojs/lang/tr.js",
-				"uk": "resources/videojs/lang/uk.js",
-				"vi": "resources/videojs/lang/vi.js",
-				"zh-cn": "resources/videojs/lang/zh-CN.js",
-				"zh-hans": "resources/videojs/lang/zh-Hans.js",
-				"zh-hant": "resources/videojs/lang/zh-Hant.js",
-				"zh-tw": "resources/videojs/lang/zh-TW.js"
-			}
-		},
-		"ext.tmh.videojs-ogvjs": {
-			"es6": true,
-			"scripts": "resources/videojs-ogvjs/videojs-ogvjs.js",
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"ext.tmh.video-js",
-				"ext.tmh.OgvJs"
-			]
-		},
-		"ext.tmh.player": {
-			"es6": true,
-			"packageFiles": [
-				"resources/ext.tmh.player.js",
-				"resources/ext.tmh.player.element.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"ext.tmh.player.styles",
-				"ext.tmh.OgvJsSupport",
-				"mediawiki.Title"
-			],
-			"messages": [
-				"timedmedia-play-media",
-				"timedmedia-subtitles-available",
-				"timedmedia-duration-hms",
-				"timedmedia-duration-ms",
-				"timedmedia-duration-s"
-			]
-		},
-		"ext.tmh.player.dialog": {
-			"es6": true,
-			"packageFiles": [
-				"resources/ext.tmh.player.dialog.loader.js",
-				"resources/ext.tmh.player.dialog.js"
-			],
-			"styles": [
-				"resources/ext.tmh.player.dialog.less"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"oojs-ui-core",
-				"oojs-ui-windows",
-				"ext.tmh.player.inline"
-			],
-			"messages": [ "timedmedia-dialog-close" ]
-		},
-		"ext.tmh.player.inline": {
-			"es6": true,
-			"packageFiles": [
-				"resources/ext.tmh.player.inline.js",
-				"resources/mw-info-button/mw-info-button.js",
-				"resources/videojs-resolution-switcher/videojs-resolution-switcher.js",
-				"resources/mw-subtitles-button/mw-subtitles-create.js",
-				"resources/mw-subtitles-button/mw-subtitles-button.js"
-			],
-			"styles": [
-				"resources/ext.tmh.player.inline.styles.less",
-				"resources/mw-info-button/mw-info-button.css",
-				"resources/videojs-resolution-switcher/videojs-resolution-switcher.css",
-				"resources/ext.tmh.player.inline.styles.less"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"ext.tmh.video-js",
-				"mediawiki.Title"
-			],
-			"messages": [
-				"timedmedia-resolution-120",
-				"timedmedia-resolution-160",
-				"timedmedia-resolution-180",
-				"timedmedia-resolution-240",
-				"timedmedia-resolution-360",
-				"timedmedia-resolution-480",
-				"timedmedia-resolution-720",
-				"timedmedia-resolution-1080",
-				"timedmedia-resolution-1440",
-				"timedmedia-resolution-2160",
-				"videojs-more-information",
-				"videojs-quality",
-				"videojs-subtitles-create",
-				"videojs-captions-create"
-			]
-		},
-		"ext.tmh.player.styles": {
-			"styles": "resources/ext.tmh.player.styles.less",
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
 		"ext.tmh.transcodetable": {
 			"scripts": "resources/transcode-table/transcode-table.js",
 			"styles": "resources/transcode-table/transcode-table.css",
@@ -507,31 +306,6 @@
 				"timedmedia-reset-areyousure",
 				"timedmedia-reset-explanation"
 			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.tmh.timedtextpage.styles": {
-			"styles": "resources/ext.tmh.timedtextpage.styles.less"
-		},
-		"ext.tmh.OgvJsSupport": {
-			"es6": true,
-			"scripts": [
-				"resources/ogv.js/ogv-support.js",
-				"resources/ext.tmh.OgvJsSupport.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
-			]
-		},
-		"ext.tmh.OgvJs": {
-			"es6": true,
-			"scripts": [
-				"resources/ogv.js/ogv.js"
-			],
-			"dependencies": "ext.tmh.OgvJsSupport",
 			"targets": [
 				"mobile",
 				"desktop"

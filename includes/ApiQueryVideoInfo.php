@@ -11,7 +11,6 @@ namespace MediaWiki\TimedMediaHandler;
 
 use ApiBase;
 use ApiQueryImageInfo;
-use MediaWiki\TimedMediaHandler\Handlers\TextHandler\TextHandler;
 use MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode;
 
 class ApiQueryVideoInfo extends ApiQueryImageInfo {
@@ -39,27 +38,6 @@ class ApiQueryVideoInfo extends ApiQueryImageInfo {
 				$vals['derivatives'] = [];
 			}
 		}
-		if ( isset( $prop['timedtext'] ) ) {
-			if ( $file->getHandler() && $file->getHandler() instanceof TimedMediaHandler ) {
-				$handler = new TextHandler(
-					$file,
-					[ TimedTextPage::SRT_SUBTITLE_FORMAT, TimedTextPage::VTT_SUBTITLE_FORMAT ]
-				);
-				$timedtext = $handler->getTracks();
-				foreach ( $timedtext as &$track ) {
-					$track['src'] = wfExpandUrl( $track['src'], PROTO_CURRENT );
-					// We add origin anonymous for the benefit of
-					// InstantCommons, the primary user of this API
-					$track['src'] = wfAppendQuery( $track['src'], [ 'origin' => '*' ] );
-				}
-				unset( $track );
-				$result->setIndexedTagName( $timedtext, "timedtext" );
-				$vals['timedtext'] = $timedtext;
-			} else {
-				// Non-TMH file, no timedtext.
-				$vals['timedtext'] = [];
-			}
-		}
 		return $vals;
 	}
 
@@ -67,7 +45,6 @@ class ApiQueryVideoInfo extends ApiQueryImageInfo {
 	public static function getPropertyMessages( $filter = [] ) {
 		$pm = parent::getPropertyMessages( $filter );
 		$pm['derivatives'] = 'apihelp-query+videoinfo-paramvalue-prop-derivatives';
-		$pm['timedtext'] = 'apihelp-query+videoinfo-paramvalue-prop-timedtext';
 		return array_diff_key( $pm, array_flip( $filter ) );
 	}
 
