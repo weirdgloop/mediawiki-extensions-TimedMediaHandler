@@ -7,7 +7,6 @@ use MediaTransformOutput;
 use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\TimedMediaHandler\Handlers\TextHandler\TextHandler;
 use MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode;
 
 class TimedMediaTransformOutput extends MediaTransformOutput {
@@ -21,8 +20,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 
 	/** @var string|false|null */
 	public $hashTime;
-
-	public ?TextHandler $textHandler = null;
 
 	/** @var string|false|null */
 	public $disablecontrols;
@@ -88,14 +85,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$this->inline = $conf['inline'] ?? false;
 		$this->muted = $conf['muted'] ?? false;
 		$this->loop = $conf['loop'] ?? false;
-	}
-
-	private function getTextHandler(): TextHandler {
-		if ( !$this->textHandler ) {
-			// Init an associated textHandler
-			$this->textHandler = new TextHandler( $this->file, [ TimedTextPage::VTT_SUBTITLE_FORMAT ] );
-		}
-		return $this->textHandler;
 	}
 
 	/**
@@ -333,27 +322,11 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			}
 		}
 		unset( $source );
-		$mediaTracks = $this->file ? $this->getTextHandler()->getTracks() : [];
-		foreach ( $mediaTracks as &$track ) {
-			foreach ( $track as $attr => $val ) {
-				if ( $attr === 'title' || $attr === 'provider' ) {
-					$track[ 'data-mw' . $attr ] = $val;
-					unset( $track[ $attr ] );
-				} elseif ( $attr === 'dir' ) {
-					$track[ 'data-' . $attr ] = $val;
-					unset( $track[ $attr ] );
-				}
-			}
-		}
-		unset( $track );
 
 		// Build the video tag output:
 		return Html::rawElement( $this->getTagName(), $mediaAttr,
 			// The set of media sources:
-			self::htmlTagSet( 'source', $mediaSources ) .
-
-			// Timed text:
-			self::htmlTagSet( 'track', $mediaTracks )
+			self::htmlTagSet( 'source', $mediaSources )
 		);
 	}
 
@@ -538,14 +511,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	public function getAPIData( ?array $options = null ): array {
 		$options ??= [ 'fullurl' ];
 
-		$timedtext = $this->getTextHandler()->getTracks();
-		if ( in_array( 'fullurl', $options, true ) ) {
-			foreach ( $timedtext as &$track ) {
-				$track['src'] = MediaWikiServices::getInstance()->getUrlUtils()->expand( $track['src'], PROTO_CURRENT );
-			}
-			unset( $track );
-		}
-
 		$derivatives = WebVideoTranscode::getSources( $this->file, $options );
 		if ( in_array( 'withhash', $options, true ) ) {
 			// Check if we have "start or end" times and append the temporal url fragment hash
@@ -557,7 +522,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 
 		return [
 			'derivatives' => $derivatives,
-			'timedtext' => $timedtext,
 		];
 	}
 }
