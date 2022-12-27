@@ -39,6 +39,8 @@ class TimedMediaHandler extends MediaHandler {
 			'timedmedia_disablecontrols' => 'disablecontrols',
 			'timedmedia_loop' => 'loop',
 			'timedmedia_muted' => 'muted',
+            'timedmedia_autoplay' => 'autoplay',
+            'timedmedia_nocontrols' => 'nocontrols'
 		];
 	}
 
@@ -51,16 +53,16 @@ class TimedMediaHandler extends MediaHandler {
 	 */
 	public function validateParam( $name, $value ) {
 		if ( $name === 'thumbtime' || $name === 'start' || $name === 'end' ) {
-			if ( self::parseTimeString( $value ) === false ) {
-				return false;
-			}
-		} elseif ( $name === 'disablecontrols' ) {
-			$values = explode( ',', $value );
-			foreach ( $values as $v ) {
-				if ( !in_array( $v, [ 'options', 'timedText', 'fullscreen' ] ) ) {
-					return false;
-				}
-			}
+            if (self::parseTimeString($value) === false) {
+                return false;
+            }
+        } elseif ( $name === 'disablecontrols' ) {
+            $values = explode( ',', $value );
+            foreach ( $values as $v ) {
+                if ( !in_array( $v, [ 'options', 'timedText', 'fullscreen' ] ) ) {
+                    return false;
+                }
+            }
 		} elseif ( $name === 'width' || $name === 'height' ) {
 			return $value > 0;
 		}
@@ -191,7 +193,7 @@ class TimedMediaHandler extends MediaHandler {
 			return false;
 		}
 
-		foreach ( [ 'loop', 'muted' ] as $flag ) {
+		foreach ( [ 'loop', 'muted', 'autoplay', 'nocontrols' ] as $flag ) {
 			$params[ $flag ] = isset( $params[ $flag ] );
 		}
 		return true;
@@ -389,6 +391,8 @@ class TimedMediaHandler extends MediaHandler {
 			'loop' => $params['loop'] ?? false,
 			'muted' => $params['muted'] ?? false,
 			'inline' => $params['inline'] ?? false,
+            'autoplay' => $params['autoplay'] ?? false,
+            'nocontrols' => $params['nocontrols'] ?? false
 		];
 
 		// Allow start and end query string params on image pages (T203994)

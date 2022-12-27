@@ -58,6 +58,12 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	/** @var bool */
 	protected $loop;
 
+    /** @var bool */
+    protected $autoPlay;
+
+    /** @var bool */
+    protected $noControls;
+
 	// The prefix for player ids
 	private const PLAYER_ID_PREFIX = 'mwe_player_';
 
@@ -83,6 +89,8 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$this->inline = $conf['inline'] ?? false;
 		$this->muted = $conf['muted'] ?? false;
 		$this->loop = $conf['loop'] ?? false;
+        $this->autoPlay = $conf['autoplay'] ?? false;
+        $this->noControls = $conf['nocontrols'] ?? false;
 	}
 
 	/**
@@ -319,7 +327,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			'shorttitle',
 			'bandwidth',
 			'framerate',
-			'disablecontrols',
+            'disablecontrols',
 			'transcodekey',
 			'label',
 			'res',
@@ -386,18 +394,19 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			// Get the correct size:
 			'poster' => $this->getUrl( $sizeOverride ),
 
-			// Note we set controls to true ( for no-js players )
-			// When ext.tmh.player.element.js runs it replaces the native player controls
-			'controls' => 'true',
-
 			// Since we will reload the item with javascript,
 			// tell browser to not load the video before
 			'preload' => 'none',
 		];
 
-		if ( $autoPlay === true ) {
+		if ( $this->autoPlay === true || $autoPlay === true ) {
 			$mediaAttr['autoplay'] = 'true';
+            $mediaAttr['muted'] = 'true';
 		}
+
+        if ( !$this->noControls ) {
+            $mediaAttr['controls'] = 'true';
+        }
 
 		if ( !$this->isVideo ) {
 			// audio element doesn't have poster attribute
@@ -430,10 +439,10 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			$mediaAttr['preload'] = 'auto';
 		}
 
-		// Used by Score extension and to disable specific controls from wikicode
-		if ( $this->disablecontrols ) {
-			$mediaAttr[ 'data-disablecontrols' ] = $this->disablecontrols;
-		}
+        // Used by Score extension and to disable specific controls from wikicode
+        if ( $this->disablecontrols ) {
+            $mediaAttr[ 'data-disablecontrols' ] = $this->disablecontrols;
+        }
 
 		// Additional class-name provided by Transform caller
 		if ( $this->playerClass ) {
