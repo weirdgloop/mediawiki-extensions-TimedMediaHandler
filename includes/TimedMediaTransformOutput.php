@@ -88,7 +88,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$this->fillwindow = $conf['fillwindow'] ?? false;
 		$this->disablecontrols = $conf['disablecontrols'] ?? false;
 		$this->playerClass = $conf['playerClass'] ?? false;
-		$this->inline = $conf['inline'] ?? false;
+		$this->inline = $conf['inline'] ?? true;
 		$this->muted = $conf['muted'] ?? false;
 		$this->loop = $conf['loop'] ?? false;
 		$this->autoPlay = $conf['autoplay'] ?? false;
@@ -423,9 +423,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			$mediaAttr[ 'data-player' ] = 'fillwindow';
 		}
 		if ( $this->inline ) {
-			$mediaAttr['class'] .= ' mw-tmh-inline';
 			$mediaAttr['playsinline'] = '';
-			$mediaAttr['preload'] = 'auto';
 		}
 
 		// Used by Score extension and to disable specific controls from wikicode
