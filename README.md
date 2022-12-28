@@ -10,6 +10,7 @@ This is a fork of the [TimedMediaHandler](https://www.mediawiki.org/wiki/Extensi
 * Added `autoplay` parameter for files: when enabled, autoplays and mutes media
 * Added `nocontrols` parameter for files: when enabled, shows no controls
 * Video transcoding is disabled by default (change `$wgEnabledTranscodeSet` to enable)
+* Video elements have the `playsinline` attribute by default, for autoplay compatibility on iOS Safari
 
 ## Rationale behind this fork
 

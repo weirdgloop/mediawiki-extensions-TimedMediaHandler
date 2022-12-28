@@ -390,7 +390,7 @@ class TimedMediaHandler extends MediaHandler {
 			'disablecontrols' => $params['disablecontrols'] ?? false,
 			'loop' => $params['loop'] ?? false,
 			'muted' => $params['muted'] ?? false,
-			'inline' => $params['inline'] ?? false,
+			'inline' => $params['inline'] ?? true,
             'autoplay' => $params['autoplay'] ?? false,
             'nocontrols' => $params['nocontrols'] ?? false
 		];
