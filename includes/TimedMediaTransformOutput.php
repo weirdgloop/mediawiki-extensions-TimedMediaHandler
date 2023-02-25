@@ -199,12 +199,12 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	private function useImagePopUp() {
 		global $wgMinimumVideoPlayerSize;
 		// Check if the video is too small to play inline ( instead do a pop-up dialog )
-		// If we're filling the window (e.g. during an iframe embed) one probably doesn't want the pop up.
-		// Also the pop up is broken in that case.
+		// If we're filling the window (e.g. during an iframe embed) one probably doesn't want the pop-up.
+		// Also, the pop-up is broken in that case.
 		return $this->isVideo
 			&& !$this->fillwindow
 			&& $this->getPlayerWidth() < $wgMinimumVideoPlayerSize
-			// Do not do pop-up if its going to be the same size as inline player anyways
+			// Do not do pop-up if it's going to be the same size as inline player anyways
 			&& $this->getPlayerWidth() < $this->getPopupPlayerWidth();
 	}
 
@@ -261,18 +261,18 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$width = $this->getPlayerWidth();
 		$maxWidth = $this->getPopupPlayerWidth();
 		if ( $this->useImagePopUp() || $width > $maxWidth ) {
-			// If its a pop-up player than we should use the pop up player size
-			// if its a normal player, but has a bigger width than the pop-up
+			// If it's a pop-up player than we should use the pop-up player size.
+			// If it's a normal player, but has a bigger width than the pop-up
 			// player, then we use the pop-up players width as the target width
-			// as that is equivalent to the max transcode size. Otherwise this
+			// as that is equivalent to the max transcode size. Otherwise, this
 			// will suggest the original file as the best source, which seems like
 			// a potentially bad idea, as it could be anything size wise.
 			$width = $maxWidth;
 		}
 
 		if ( $a['width'] < $width && $b['width'] >= $width ) {
-			// $a is not wide enough but $b is
-			// so we consider $a > $b as we want $b before $a
+			// $a is not wide enough but $b is, so we
+			// consider $a > $b as we want $b before $a
 			return 1;
 		}
 		if ( $a['width'] >= $width && $b['width'] < $width ) {
@@ -315,8 +315,8 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			return 'Error missing media source';
 		}
 
-		// Sort sources by bandwidth least to greatest ( so default selection on resource constrained
-		// browsers ( without js? ) go with minimal source.
+		// Sort sources by bandwidth least to greatest (so that the default selection on resource
+		// constrained browsers (without js?) go with minimal source.)
 		usort( $mediaSources, [ $this, 'sortMediaByBandwidth' ] );
 
 		// We prefix some source attributes with data- to pass along to the javascript player
@@ -343,12 +343,10 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		unset( $source );
 
 		// Build the video tag output:
-		$s = Html::rawElement( $this->getTagName(), $mediaAttr,
+		return Html::rawElement( $this->getTagName(), $mediaAttr,
 			// The set of media sources:
 			self::htmlTagSet( 'source', $mediaSources )
 		);
-
-		return $s;
 	}
 
 	/**
