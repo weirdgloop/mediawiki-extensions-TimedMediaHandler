@@ -1,6 +1,6 @@
 {
 	"require": {
-		"james-heinrich/getid3": "^v1.9.22"
+		"james-heinrich/getid3": "v1.9.23"
 	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "40.0.1",
