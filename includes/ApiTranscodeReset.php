@@ -85,8 +85,7 @@ class ApiTranscodeReset extends ApiBase {
 		if ( $timeSinceLastReset < $waitTimeForTranscodeReset ) {
 			$msg = $this->msg(
 				'apierror-timedmedia-notenoughtimereset',
-				TimedMediaHandler::getTimePassedMsg( $waitTimeForTranscodeReset - $timeSinceLastReset )
-			);
+			)->durationParams( $waitTimeForTranscodeReset - $timeSinceLastReset );
 			$this->dieWithError( $msg, 'notenoughtimereset' );
 		}
 
