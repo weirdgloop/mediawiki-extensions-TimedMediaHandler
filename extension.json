@@ -323,9 +323,6 @@
 				"timedmedia-error-details",
 				"timedmedia-error-dismiss"
 			]
-		},
-		"embedPlayerIframeStyle": {
-			"styles": "embedPlayerIframe.css"
 		}
 	},
 	"MediaHandlers": {
