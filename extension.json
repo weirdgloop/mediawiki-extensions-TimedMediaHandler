@@ -310,13 +310,6 @@
 				"mobile",
 				"desktop"
 			]
-		},
-		"embedPlayerIframeStyle": {
-			"styles": "resources/embedPlayerIframe.css",
-			"targets": [
-				"mobile",
-				"desktop"
-			]
 		}
 	},
 	"MediaHandlers": {
