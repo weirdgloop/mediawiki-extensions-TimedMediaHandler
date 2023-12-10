@@ -13,6 +13,7 @@
 	"timedmedia-ogg-long-general": "Ogg media file, length $2, $3, file size: $6",
 	"timedmedia-ogg-long-error": "Invalid Ogg file: $1, file size: $2",
 	"timedmedia-ogg-long-no-streams": "Ogg media file, file size: $1. Warning: None of the codecs used in this file are recognized.",
+	"timedmedia-ogg-no-video": "You can only upload OGG audio files. Theora is not supported.",
 	"timedmedia-webm-short-video": "WebM $1 video file, $2",
 	"timedmedia-webm-long-video": "WebM audio/video file, $1, length $2, $4 × $5 pixels, $3 overall, file size: $6",
 	"timedmedia-flac-short-audio": "FLAC audio file, $1",
