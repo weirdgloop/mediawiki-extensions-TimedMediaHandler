@@ -229,6 +229,15 @@ class OggHandler extends TimedMediaHandler {
 		return $baseType . '; codecs="' . $codecs . '"';
 	}
 
+	/** @inheritDoc */
+	public function verifyUpload( $fileName ) {
+		if ( $this->isAudio( $file ) ) {
+			return Status::newGood();
+		}
+
+		return Status::newFatal( 'timedmedia-ogg-no-video' );
+	}
+
 	/**
 	 * @param File $file
 	 * @return string[]|false
