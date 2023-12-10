@@ -5,6 +5,7 @@ namespace MediaWiki\TimedMediaHandler\Handlers\OggHandler;
 use File;
 use File_Ogg;
 use IContextSource;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\TimedMediaHandler\TimedMediaHandler;
 use Wikimedia\AtEase\AtEase;
 
@@ -231,7 +232,8 @@ class OggHandler extends TimedMediaHandler {
 
 	/** @inheritDoc */
 	public function verifyUpload( $fileName ) {
-		if ( $this->isAudio( $file ) ) {
+		$mimeAnalyzer = MediaWikiServices::getInstance()->getMimeAnalyzer();
+		if ( $mimeAnalyzer->getMediaType( $fileName ) !== MEDIATYPE_VIDEO ) {
 			return Status::newGood();
 		}
 
