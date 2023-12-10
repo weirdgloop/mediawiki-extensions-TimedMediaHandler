@@ -29,7 +29,7 @@ After you installed this extension, add the following to the end of your
 
 ```
   wfLoadExtension( 'TimedMediaHandler' );
-  
+
   // Change the following line as appropriate
   $wgFFmpegLocation = '/usr/bin/ffmpeg';
 ```
@@ -42,6 +42,6 @@ Then, run the following:
 ## Configuration
 For the most part, the configuration is the same as the original [TimedMediaHandler](https://www.mediawiki.org/wiki/Extension:TimedMediaHandler#Configuration), but with the following changes:
 
-* `$wgTmhEnableMp4Uploads` is enabled by default.
+* `$wgTmhEnableMp4Uploads` is removed and mp4 files are supported by default in `$wgTmhFileExtensions`.
 * `$wgEnableIframeEmbed` was removed, as it is not used.
 * `$wgTimedTextNS` and `$wgTimedTextForeignNamespaces` was removed, as captions support has been dropped for now.

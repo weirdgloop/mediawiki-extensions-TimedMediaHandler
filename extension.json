@@ -233,13 +233,8 @@
 				"m4a": false
 			}
 		},
-		"TmhEnableMp4Uploads": {
-			"description": "If MP4 source assets can be ingested",
-			"public": true,
-			"value": true
-		},
 		"TmhFileExtensions": {
-			"description": "List of extensions handled by Timed Media Handler since its referenced in a few places. You should not modify this variable.",
+			"description": "List of extensions handled by Timed Media Handler. These will be allowed for upload.",
 			"public": true,
 			"value": [
 				"ogg",

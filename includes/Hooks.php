@@ -92,18 +92,10 @@ class Hooks implements
 	public static function register() {
 		global $wgJobTypesExcludedFromDefaultQueue,
 		$wgExcludeFromThumbnailPurge,
-		$wgFileExtensions, $wgTmhEnableMp4Uploads,
+		$wgFileExtensions,
 		$wgTmhFileExtensions;
 
 		$wgFileExtensions = array_merge( $wgFileExtensions, $wgTmhFileExtensions );
-
-		// Remove mp4 if not enabled:
-		if ( $wgTmhEnableMp4Uploads === false ) {
-			$index = array_search( 'mp4', $wgFileExtensions, true );
-			if ( $index !== false ) {
-				array_splice( $wgFileExtensions, $index, 1 );
-			}
-		}
 
 		// Transcode jobs must be explicitly requested from the job queue:
 		$wgJobTypesExcludedFromDefaultQueue[] = 'webVideoTranscode';
