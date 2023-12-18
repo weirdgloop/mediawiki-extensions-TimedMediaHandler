@@ -7,6 +7,7 @@ use File_Ogg;
 use IContextSource;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\TimedMediaHandler\TimedMediaHandler;
+use Status;
 use Wikimedia\AtEase\AtEase;
 
 /**
