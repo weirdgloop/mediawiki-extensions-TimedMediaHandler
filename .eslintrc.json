@@ -1,15 +1,36 @@
 {
 	"root": true,
+	"plugins": [
+		"no-jquery"
+	],
 	"extends": [
-		"wikimedia/client-es5",
+		"plugin:no-jquery/deprecated",
+		"plugin:no-jquery/slim",
+		"wikimedia/client-es6",
 		"wikimedia/jquery",
 		"wikimedia/mediawiki"
 	],
+	"env": {
+		"browser": true
+	},
 	"globals": {
 		"videojs": true
 	},
+	"parserOptions": {
+		"sourceType": "module"
+	},
 	"rules": {
+		"jsdoc/no-undefined-types": "off",
 		"no-restricted-properties": "warn",
-		"compat/compat": "warn"
-	}
+		"compat/compat": "warn",
+		"es-x/no-array-prototype-fill": "warn"
+	},
+	"overrides": [
+		{
+			"files": [
+				"i18n/*"
+			],
+			"rules": { "security/detect-bidi-characters": "off" }
+		}
+	]
 }

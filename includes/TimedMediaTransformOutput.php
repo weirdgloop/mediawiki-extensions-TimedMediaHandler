@@ -5,6 +5,8 @@ namespace MediaWiki\TimedMediaHandler;
 use Exception;
 use Html;
 use MediaTransformOutput;
+use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode;
 
 class TimedMediaTransformOutput extends MediaTransformOutput {
@@ -185,6 +187,14 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		}
 
 		$mediaAttr = $this->getMediaAttr( false, false, $classes );
+
+		// XXX: This might be redundant with data-mwtitle
+		$services = MediaWikiServices::getInstance();
+		$enableLegacyMediaDOM = $services->getMainConfig()->get( MainConfigNames::ParserEnableLegacyMediaDOM );
+		if ( !$enableLegacyMediaDOM && isset( $options['magnify-resource'] ) ) {
+			$mediaAttr['resource'] = $options['magnify-resource'];
+		}
+
 		$res = $this->getHtmlMediaTagOutput( $mediaAttr );
 		$this->width = $oldWidth;
 		$this->height = $oldHeight;
@@ -215,7 +225,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	 * @return string
 	 */
 	private static function htmlTagSet( $tagName, $tagSet ) {
-		if ( empty( $tagSet ) ) {
+		if ( !$tagSet ) {
 			return '';
 		}
 		$s = '';
@@ -323,17 +333,22 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		$prefixedSourceAttr = [
 			'width',
 			'height',
-			'title',
-			'shorttitle',
+			'transcodekey',
+		];
+		$removeSourceAttr = [
 			'bandwidth',
 			'framerate',
-            'disablecontrols',
-			'transcodekey',
+			'disablecontrols',
+			'title',
+			'shorttitle',
 			'label',
 			'res',
 		];
 		foreach ( $mediaSources as &$source ) {
 			foreach ( $source as $attr => $val ) {
+				if ( in_array( $attr, $removeSourceAttr, true ) ) {
+					unset( $source[ $attr ] );
+				}
 				if ( in_array( $attr, $prefixedSourceAttr, true ) ) {
 					$source[ 'data-' . $attr ] = $val;
 					unset( $source[ $attr ] );

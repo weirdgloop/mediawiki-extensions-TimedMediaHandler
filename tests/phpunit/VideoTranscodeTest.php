@@ -7,6 +7,7 @@ use MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode;
  * @ingroup timedmedia
  * @author michael dale
  * @group medium
+ * @group Database
  * @covers \MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode
  */
 class VideoTranscodeTest extends ApiVideoUploadTestCase {
@@ -127,7 +128,7 @@ class VideoTranscodeTest extends ApiVideoUploadTestCase {
 		return $videoInfo['derivatives'];
 	}
 
-	public function transcodeSetProvider() {
+	public static function transcodeSetProvider() {
 		return [
 			[ [ '360p.webm' => true ], [], false ],
 			[ [ 'foobar' => true ], [], true ],
@@ -145,7 +146,7 @@ class VideoTranscodeTest extends ApiVideoUploadTestCase {
 			'wgEnabledAudioTranscodeSet' => $audioSet
 		] );
 		if ( $exception ) {
-			$this->expectException( \MWException::class );
+			$this->expectException( ConfigException::class );
 		}
 		WebVideoTranscode::validateTranscodeConfiguration();
 		// Silence testcase when everything is ok

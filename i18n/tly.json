@@ -8,7 +8,8 @@
 			"Гусейн"
 		]
 	},
-	"timedmedia-source-file": "Сәвон $1",
-	"timedmedia-source-audio-file-desc": "Оригинал $1 фајл ($2)",
-	"timedmedia-subtitle-new-go": "Davardey"
+	"timedmedia-source-file": "Səvon $1",
+	"timedmedia-source-audio-file-desc": "Original $1 fajl ($2)",
+	"timedmedia-subtitle-new-go": "Davardey",
+	"videojs-more-information": "Vej məlumot"
 }

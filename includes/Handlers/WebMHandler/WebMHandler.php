@@ -56,14 +56,12 @@ class WebMHandler extends ID3Handler {
 		$size = [ false, false ];
 		// display_x/display_y is only set if DisplayUnit
 		// is pixels, otherwise display_aspect_ratio is set
-		if ( isset( $metadata['video']['display_x'] ) && isset( $metadata['video']['display_y'] )
-		) {
+		if ( isset( $metadata['video']['display_x'] ) && isset( $metadata['video']['display_y'] ) ) {
 			$size = [
 				$metadata['video']['display_x'],
 				$metadata['video']['display_y']
 			];
-		} elseif ( isset( $metadata['video']['resolution_x'] ) && isset( $metadata['video']['resolution_y'] )
-		) {
+		} elseif ( isset( $metadata['video']['resolution_x'] ) && isset( $metadata['video']['resolution_y'] ) ) {
 			$size = [
 				$metadata['video']['resolution_x'],
 				$metadata['video']['resolution_y']
@@ -106,7 +104,7 @@ class WebMHandler extends ID3Handler {
 	 * @return string
 	 */
 	public function getWebType( $file ) {
-		$baseType = ( $file->getWidth() === 0 && $file->getHeight() === 0 ) ? 'audio' : 'video';
+		$baseType = ( !$file->getWidth() && !$file->getHeight() ) ? 'audio' : 'video';
 
 		$streams = $this->getStreamTypes( $file );
 		if ( !$streams ) {
@@ -177,19 +175,22 @@ class WebMHandler extends ID3Handler {
 	 * @return string
 	 */
 	public function getLongDesc( $file ) {
-		global $wgLang;
 		$streamTypes = $this->getStreamTypes( $file );
 		if ( !$streamTypes ) {
 			return parent::getLongDesc( $file );
 		}
 		return wfMessage(
 			'timedmedia-webm-long-video',
-			implode( '/', $streamTypes ),
-			$wgLang->formatTimePeriod( $this->getLength( $file ) ),
-			$wgLang->formatBitrate( $this->getBitRate( $file ) )
+			implode( '/', $streamTypes )
+			)->timeperiodParams(
+				$this->getLength( $file )
+			)->bitrateParams(
+				$this->getBitRate( $file )
 			)->numParams(
 				$file->getWidth(),
 				$file->getHeight()
+			)->sizeParams(
+				$file->getSize()
 			)->text();
 	}
 

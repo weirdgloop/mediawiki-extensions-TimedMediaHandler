@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
 module.exports = function ( grunt ) {
-	var conf = grunt.file.readJSON( 'extension.json' );
+	const conf = grunt.file.readJSON( 'extension.json' );
 
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
@@ -14,15 +14,7 @@ module.exports = function ( grunt ) {
 			options: {
 				cache: true
 			},
-			all: [
-				'**/*.{js,json}',
-				'!resources/mw-info-button/**',
-				// Third party resources
-				'!resources/ogv.js/**',
-				'!resources/videojs*/**',
-				'!node_modules/**',
-				'!vendor/**'
-			]
+			all: '.'
 		},
 		stylelint: {
 			all: [
@@ -61,6 +53,8 @@ module.exports = function ( grunt ) {
 					'!alt/*.novtt.js',
 					'!alt/*.novtt.min.js',
 					'!examples/**',
+					'!font/**',
+					'!types/**',
 					'!*.zip',
 					'!*.swf',
 					'!lang/*.json',

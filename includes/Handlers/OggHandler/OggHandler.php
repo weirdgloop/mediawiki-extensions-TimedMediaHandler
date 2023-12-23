@@ -83,7 +83,7 @@ class OggHandler extends TimedMediaHandler {
 	 * @return array Array of metadata. See MW's FormatMetadata class for format.
 	 */
 	public function getCommonMetaArray( File $file ) {
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
+		$metadata = $file->getMetadataArray();
 		if ( !$metadata || isset( $metadata['error'] ) || !isset( $metadata['streams'] ) ) {
 			return [];
 		}
@@ -247,11 +247,8 @@ class OggHandler extends TimedMediaHandler {
 	 */
 	public function getStreamTypes( $file ) {
 		$streamTypes = [];
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
-		if ( !$metadata || isset( $metadata['error'] ) ) {
-			return false;
-		}
-		foreach ( $metadata['streams'] as $stream ) {
+		$metadata = $file->getMetadataArray();
+		foreach ( $metadata['streams'] ?? [] as $stream ) {
 			$streamTypes[] = $stream['type'];
 		}
 		return array_unique( $streamTypes );
@@ -259,26 +256,20 @@ class OggHandler extends TimedMediaHandler {
 
 	/**
 	 * @param File $file
-	 * @return int
+	 * @return float
 	 */
 	public function getOffset( $file ) {
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
-		if ( !$metadata || isset( $metadata['error'] ) || !isset( $metadata['offset'] ) ) {
-			return 0;
-		}
-		return $metadata['offset'];
+		$metadata = $file->getMetadataArray();
+		return (float)( $metadata['offset'] ?? 0.0 );
 	}
 
 	/**
 	 * @param File $file
-	 * @return int
+	 * @return float
 	 */
 	public function getLength( $file ) {
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
-		if ( !$metadata || isset( $metadata['error'] ) ) {
-			return 0;
-		}
-		return $metadata['length'];
+		$metadata = $file->getMetadataArray();
+		return (float)( $metadata['length'] ?? 0.0 );
 	}
 
 	/**
@@ -289,7 +280,6 @@ class OggHandler extends TimedMediaHandler {
 	 */
 	public function getContentHeaders( $metadata ) {
 		$result = [];
-		$metadata = $this->unpackMetadata( $metadata, false );
 
 		if ( $metadata && !isset( $metadata['error'] ) && isset( $metadata['length'] ) ) {
 			$result = [ 'X-Content-Duration' => (float)$metadata['length'] ];
@@ -298,23 +288,70 @@ class OggHandler extends TimedMediaHandler {
 		return $result;
 	}
 
-	/**
-	 * @param File $file
-	 * @return float|int
-	 */
-	public function getFramerate( $file ) {
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
-		if ( !$metadata || isset( $metadata['error'] ) ) {
-			return 0;
-		}
-
-		// Return the first found theora stream framerate:
-		foreach ( $metadata['streams'] as $stream ) {
-			if ( $stream['type'] === 'Theora' ) {
-				return $stream['header']['FRN'] / $stream['header']['FRD'];
+	private function findStream( File $file, array $types ): ?array {
+		$metadata = $file->getMetadataArray();
+		foreach ( $metadata['streams'] ?? [] as $stream ) {
+			if ( in_array( $stream['type'] ?? [], $types ) ) {
+				return $stream;
 			}
 		}
-		return 0;
+		return null;
+	}
+
+	private function findVideoStream( File $file ): ?array {
+		global $wgMediaVideoTypes;
+		return $this->findStream( $file, $wgMediaVideoTypes );
+	}
+
+	private function findAudioStream( File $file ): ?array {
+		global $wgMediaAudioTypes;
+		return $this->findStream( $file, $wgMediaAudioTypes );
+	}
+
+	/**
+	 * @param File $file
+	 * @return float
+	 */
+	public function getFramerate( $file ) {
+		$stream = $this->findVideoStream( $file );
+		if ( $stream ) {
+			return $stream['header']['FRN'] / $stream['header']['FRD'];
+		}
+		return 0.0;
+	}
+
+	/**
+	 * @param File $file
+	 * @return bool
+	 */
+	public function hasVideo( $file ) {
+		$stream = $this->findVideoStream( $file );
+		return $stream !== null;
+	}
+
+	/**
+	 * @param File $file
+	 * @return bool
+	 */
+	public function hasAudio( $file ) {
+		$stream = $this->findAudioStream( $file );
+		return $stream !== null;
+	}
+
+	/**
+	 * @param File $file
+	 * @return int
+	 */
+	public function getAudioChannels( $file ) {
+		$stream = $this->findAudioStream( $file );
+		$header = $stream['header'] ?? null;
+		if ( isset( $header['vorbis_version'] ) ) {
+			return (int)$header['audio_channels'];
+		} elseif ( isset( $header['opus_version'] ) ) {
+			return (int)$header['nb_channels'];
+		} else {
+			return 0;
+		}
 	}
 
 	/**
@@ -345,15 +382,19 @@ class OggHandler extends TimedMediaHandler {
 	 * @return string
 	 */
 	public function getLongDesc( $file ) {
-		global $wgLang, $wgMediaVideoTypes, $wgMediaAudioTypes;
+		global $wgMediaVideoTypes, $wgMediaAudioTypes;
 
 		$streamTypes = $this->getStreamTypes( $file );
 		if ( !$streamTypes ) {
 			$unpacked = $this->unpackMetadata( $file->getMetadata() );
 			if ( isset( $unpacked['error']['message'] ) ) {
-				return wfMessage( 'timedmedia-ogg-long-error', $unpacked['error']['message'] )->text();
+				return wfMessage( 'timedmedia-ogg-long-error', $unpacked['error']['message'] )
+					->sizeParams( $file->getSize() )
+					->text();
 			}
-			return wfMessage( 'timedmedia-ogg-long-no-streams' )->text();
+			return wfMessage( 'timedmedia-ogg-long-no-streams' )
+				->sizeParams( $file->getSize() )
+				->text();
 		}
 		if ( array_intersect( $streamTypes, $wgMediaVideoTypes ) ) {
 			if ( array_intersect( $streamTypes, $wgMediaAudioTypes ) ) {
@@ -380,13 +421,17 @@ class OggHandler extends TimedMediaHandler {
 		}
 		return wfMessage(
 			$msg,
-			implode( '/', $streamTypes ),
-			$wgLang->formatTimePeriod( $length ),
-			$wgLang->formatBitrate( $this->getBitRate( $file ) )
-		)->numParams(
-			$file->getWidth(),
-			$file->getHeight()
-		)->text();
+			implode( '/', $streamTypes )
+			)->timeperiodParams(
+				$length
+			)->bitrateParams(
+				$this->getBitRate( $file )
+			)->numParams(
+				$file->getWidth(),
+				$file->getHeight()
+			)->sizeParams(
+				$file->getSize()
+			)->text();
 	}
 
 	/**
