@@ -32,10 +32,7 @@ class MPEGHandler extends ID3Handler {
 	 */
 	public function getStreamTypes( $file ) {
 		$streamTypes = [];
-		$metadata = $this->unpackMetadata( $file->getMetadata() );
-		if ( !$metadata || isset( $metadata['error'] ) ) {
-			return false;
-		}
+		$metadata = $file->getMetadataArray();
 		$videoCodec = $metadata[ 'video' ][ 'codec' ] ?? false;
 		if ( $videoCodec ) {
 			$streamTypes[] = $videoCodec;
@@ -51,20 +48,12 @@ class MPEGHandler extends ID3Handler {
 	}
 
 	/**
-	 * Get the "media size"
-	 * @param File $file
-	 * @param string $path
-	 * @param string|false $metadata
-	 * @return array|false
+	 * @inheritDoc
 	 */
-	public function getImageSize( $file, $path, $metadata = false ) {
+	protected function getSizeFromMetadata( $metadata ) {
 		// Just return the size of the first video stream
-		if ( $metadata === false ) {
-			$metadata = $file->getMetadata();
-		}
-		$metadata = $this->unpackMetadata( $metadata );
 		if ( isset( $metadata['error'] ) ) {
-			return false;
+			return [ false, false ];
 		}
 		if (
 			isset( $metadata['video']['resolution_x'] ) &&
