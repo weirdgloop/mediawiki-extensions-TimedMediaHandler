@@ -264,9 +264,7 @@
 				"mp4",
 				"mp3",
 				"midi",
-				"mid",
-				"mpg",
-				"mpeg"
+				"mid"
 			]
 		},
 		"TmhPriorityResolutionThreshold": {
