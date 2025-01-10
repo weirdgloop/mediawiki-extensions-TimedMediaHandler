@@ -109,7 +109,6 @@
 		"FileUpload": "main",
 		"ImagePageAfterImageLinks": "main",
 		"LoadExtensionSchemaUpdates": "installer",
-		"RevisionFromEditComplete": "main",
 		"PageMoveComplete": "main",
 		"ParserTestGlobals": "main",
 		"TitleMove": "main"

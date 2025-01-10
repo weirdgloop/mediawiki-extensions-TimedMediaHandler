@@ -30,7 +30,6 @@ use MediaWiki\Page\Hook\ArticlePurgeHook;
 use MediaWiki\Page\Hook\ImageOpenShowImageInlineBeforeHook;
 use MediaWiki\Page\Hook\ImagePageAfterImageLinksHook;
 use MediaWiki\Page\Hook\ImagePageFileHistoryLineHook;
-use MediaWiki\Page\Hook\RevisionFromEditCompleteHook;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\SpecialPage\Hook\WgQueryPagesHook;
 use MediaWiki\SpecialPage\SpecialPageFactory;
@@ -60,7 +59,6 @@ class Hooks implements
 	ImagePageAfterImageLinksHook,
 	PageMoveCompleteHook,
 	ParserTestGlobalsHook,
-	RevisionFromEditCompleteHook,
 	TitleMoveHook
 {
 
@@ -244,31 +242,6 @@ class Hooks implements
 		if ( $file && $this->transcodableChecker->isTranscodableFile( $file ) ) {
 			WebVideoTranscode::removeTranscodes( $file );
 			WebVideoTranscode::startJobQueue( $file );
-		}
-		return true;
-	}
-
-	/**
-	 * If file gets reverted to a previous version, reset transcodes.
-	 *
-	 * @param WikiPage $wikiPage
-	 * @param RevisionRecord $rev
-	 * @param int $originalRevId
-	 * @param UserIdentity $user
-	 * @param string[] &$tags
-	 *
-	 * @return bool
-	 */
-	public function onRevisionFromEditComplete(
-		$wikiPage, $rev, $originalRevId, $user, &$tags
-	) {
-		// Check if the article is a file and remove transcode files:
-		if ( ( $originalRevId !== false ) && $wikiPage->getTitle()->getNamespace() === NS_FILE ) {
-			$file = $this->repoGroup->findFile( $wikiPage->getTitle() );
-			if ( $this->transcodableChecker->isTranscodableFile( $file ) ) {
-				WebVideoTranscode::removeTranscodes( $file );
-				WebVideoTranscode::startJobQueue( $file );
-			}
 		}
 		return true;
 	}
