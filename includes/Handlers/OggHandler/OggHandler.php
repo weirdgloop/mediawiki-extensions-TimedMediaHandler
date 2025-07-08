@@ -6,6 +6,7 @@ use File;
 use File_Ogg;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
 use MediaWiki\TimedMediaHandler\TimedMediaHandler;
 
 /**
@@ -229,6 +230,16 @@ class OggHandler extends TimedMediaHandler {
 		}
 		$codecs = strtolower( implode( ", ", $streamTypes ) );
 		return $baseType . '; codecs="' . $codecs . '"';
+	}
+
+	/** @inheritDoc */
+	public function verifyUpload( $fileName ) {
+		$mimeAnalyzer = MediaWikiServices::getInstance()->getMimeAnalyzer();
+		if ( $mimeAnalyzer->getMediaType( $fileName ) !== MEDIATYPE_VIDEO ) {
+			return Status::newGood();
+		}
+
+		return Status::newFatal( 'timedmedia-ogg-no-video' );
 	}
 
 	/**

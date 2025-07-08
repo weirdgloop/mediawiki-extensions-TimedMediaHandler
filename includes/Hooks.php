@@ -53,23 +53,15 @@ use WikiPage;
  * @ingroup Extensions
  */
 class Hooks implements
-	ArticleContentOnDiffHook,
-	ArticleFromTitleHook,
 	ArticlePurgeHook,
-	BeforePageDisplayHook,
-	CanonicalNamespacesHook,
 	FileDeleteCompleteHook,
 	FileUndeleteCompleteHook,
 	FileUploadHook,
-	ImageOpenShowImageInlineBeforeHook,
 	ImagePageAfterImageLinksHook,
-	ImagePageFileHistoryLineHook,
 	PageMoveCompleteHook,
 	ParserTestGlobalsHook,
 	RevisionFromEditCompleteHook,
-	SkinTemplateNavigation__UniversalHook,
-	TitleMoveHook,
-	WgQueryPagesHook
+	TitleMoveHook
 {
 
 	/** @var Config */
@@ -110,28 +102,6 @@ class Hooks implements
 	}
 
 	/**
-	 * Register TimedMediaHandler namespace IDs
-	 *
-	 * This way if you set a variable like $wgTimedTextNS in LocalSettings.php
-	 * after you include TimedMediaHandler we can still read the variable values
-	 *
-	 * These are configurable due to Commons history: T123823
-	 * These need to be before registerhooks due to: T123695
-	 *
-	 * @param array &$list
-	 */
-	public function onCanonicalNamespaces( &$list ) {
-		if ( !defined( 'NS_TIMEDTEXT' ) ) {
-			$timedTextNS = $this->config->get( 'TimedTextNS' );
-			define( 'NS_TIMEDTEXT', $timedTextNS );
-			define( 'NS_TIMEDTEXT_TALK', $timedTextNS + 1 );
-		}
-
-		$list[NS_TIMEDTEXT] = 'TimedText';
-		$list[NS_TIMEDTEXT_TALK] = 'TimedText_talk';
-	}
-
-	/**
 	 * Register remaining TimedMediaHandler hooks right after initial setup
 	 *
 	 * TODO: This function shouldn't need to exist.
@@ -141,18 +111,10 @@ class Hooks implements
 	public static function register() {
 		global $wgJobTypesExcludedFromDefaultQueue,
 		$wgExcludeFromThumbnailPurge,
-		$wgFileExtensions, $wgTmhEnableMp4Uploads,
+		$wgFileExtensions,
 		$wgTmhFileExtensions;
 
 		$wgFileExtensions = array_merge( $wgFileExtensions, $wgTmhFileExtensions );
-
-		// Remove mp4 if not enabled:
-		if ( $wgTmhEnableMp4Uploads === false ) {
-			$index = array_search( 'mp4', $wgFileExtensions, true );
-			if ( $index !== false ) {
-				array_splice( $wgFileExtensions, $index, 1 );
-			}
-		}
 
 		// Transcode jobs must be explicitly requested from the job queue:
 		$wgJobTypesExcludedFromDefaultQueue[] = 'webVideoTranscode';
@@ -172,115 +134,14 @@ class Hooks implements
 	}
 
 	/**
-	 * @param ImagePage $imagePage the imagepage that is being rendered
-	 * @param OutputPage $output the output for this imagepage
-	 * @return bool
-	 */
-	public function onImageOpenShowImageInlineBefore( $imagePage, $output ) {
-		$file = $imagePage->getDisplayedFile();
-		return self::onImagePageHooks( $file, $output );
-	}
-
-	/**
-	 * @param ImageHistoryList $imageHistoryList that is being rendered
-	 * @param File $file the (old) file added in this history entry
-	 * @param string &$line the HTML of the history line
-	 * @param string &$css the CSS class of the history line
-	 * @return bool
-	 */
-	public function onImagePageFileHistoryLine( $imageHistoryList, $file, &$line, &$css ) {
-		$out = $imageHistoryList->getContext()->getOutput();
-		return self::onImagePageHooks( $file, $out );
-	}
-
-	/**
-	 * @param File $file the file that is being rendered
-	 * @param OutputPage $out the output to which this file is being rendered
-	 * @return bool
-	 */
-	private static function onImagePageHooks( $file, $out ) {
-		$handler = $file->getHandler();
-		if ( $handler instanceof TimedMediaHandler ) {
-			$out->addModuleStyles( 'ext.tmh.player.styles' );
-			$out->addModules( 'ext.tmh.player' );
-		}
-		return true;
-	}
-
-	/**
-	 * @param Title $title
-	 * @param Article|null &$article
-	 * @param IContextSource $context
-	 * @return bool
-	 */
-	public function onArticleFromTitle( $title, &$article, $context ) {
-		if ( $title->getNamespace() === $this->config->get( 'TimedTextNS' ) ) {
-			$article = new TimedTextPage( $title );
-		}
-		return true;
-	}
-
-	/**
-	 * @param DifferenceEngine $diffEngine
-	 * @param OutputPage $output
-	 * @return bool
-	 */
-	public function onArticleContentOnDiff( $diffEngine, $output ) {
-		if ( $output->getTitle()->getNamespace() === $this->config->get( 'TimedTextNS' ) ) {
-			$article = new TimedTextPage( $output->getTitle(), $diffEngine->getNewId() );
-			$article->renderOutput( $output );
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @param SkinTemplate $sktemplate
-	 * @param array &$links
-	 */
-	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
-		if ( $this->isTimedMediaHandlerTitle( $sktemplate->getTitle() ) ) {
-			$ttTitle = Title::makeTitleSafe( NS_TIMEDTEXT, $sktemplate->getTitle()->getDBkey() );
-			if ( !$ttTitle ) {
-				return;
-			}
-			$tab = $sktemplate->tabAction( $ttTitle, 'timedtext', false, '', false );
-
-			// Lookup if we have any corresponding timed text available already
-			$file = $this->repoGroup->findFile( $sktemplate->getTitle(), [ 'ignoreRedirect' => true ] );
-			$textHandler = new TextHandler( $file, [ TimedTextPage::VTT_SUBTITLE_FORMAT ] );
-			$ttExists = count( $textHandler->getTracks() ) > 0;
-			$tab[ 'exists' ] = $ttExists;
-			$tab[ 'class' ] .= !$ttExists ? ' new' : '';
-			$links[ 'namespaces' ][ 'timedtext' ] = $tab;
-			return;
-		}
-		if ( $sktemplate->getTitle()->getNamespace() === $this->config->get( 'TimedTextNS' ) ) {
-			$page = new TimedTextPage( $sktemplate->getTitle() );
-			$links['namespaces']['file'] =
-				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
-				$sktemplate->tabAction( $page->getCorrespondingFileTitle(), 'file', false, '', true );
-		}
-	}
-
-	/**
+	 * Wraps the isTranscodableFile function
 	 * @param Title $title
 	 * @return bool
 	 */
-	public function isTimedMediaHandlerTitle( $title ) {
-		if ( !$title->inNamespace( NS_FILE ) ) {
+	public static function isTranscodableTitle( $title ) {
+		if ( $title->getNamespace() !== NS_FILE ) {
 			return false;
 		}
-		$file = $this->repoGroup->findFile( $title, [ 'ignoreRedirect' => true ] );
-		// Can't find file
-		if ( !$file ) {
-			return false;
-		}
-		$handler = $file->getHandler();
-		if ( !$handler ) {
-			return false;
-		}
-		return $handler instanceof TimedMediaHandler;
 	}
 
 	/**
@@ -439,49 +300,5 @@ class Hooks implements
 
 		$globals['wgEnableTranscode'] = false;
 		$globals['wgFFmpegLocation'] = '/usr/bin/ffmpeg';
-	}
-
-	/**
-	 * Add JavaScript and CSS for special pages that may include timed media
-	 * but which will not fire the parser hook.
-	 *
-	 * FIXME: There ought to be a better interface for determining whether the
-	 * page is liable to contain timed media.
-	 *
-	 * @param OutputPage $out
-	 * @param Skin $skin
-	 */
-	public function onBeforePageDisplay( $out, $skin ): void {
-		$title = $out->getTitle();
-		$namespace = $title->getNamespace();
-		$addModules = false;
-
-		if ( $namespace === NS_CATEGORY || $namespace === $this->config->get( 'TimedTextNS' ) ) {
-			$addModules = true;
-		} elseif ( $title->isSpecialPage() ) {
-			[ $name, ] = $this->specialPageFactory->resolveAlias( $title->getDBkey() );
-			if ( $name !== null && (
-					$name === 'Search' ||
-					$name === 'GlobalUsage' ||
-					$name === 'Upload' ||
-					stripos( $name, 'file' ) !== false ||
-					stripos( $name, 'image' ) !== false
-				)
-			) {
-				$addModules = true;
-			}
-		}
-
-		if ( $addModules ) {
-			$out->addModuleStyles( 'ext.tmh.player.styles' );
-			$out->addModules( 'ext.tmh.player' );
-		}
-	}
-
-	/**
-	 * @param array &$qp
-	 */
-	public function onwgQueryPages( &$qp ) {
-		$qp[] = [ SpecialOrphanedTimedText::class, 'OrphanedTimedText' ];
 	}
 }
