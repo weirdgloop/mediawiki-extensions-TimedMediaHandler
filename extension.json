@@ -296,7 +296,6 @@
 			"value": null
 		}
 	},
-	"ForeignResourcesDir": "resources/lib",
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "TimedMediaHandler/resources"
