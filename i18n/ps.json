@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"شاه زمان پټان"
 		]
 	},
 	"timedmedia-ogg-short-audio": "Ogg $1 غږيزه دوتنه، $2",
@@ -18,5 +19,9 @@
 	"timedmedia-reset-button-dismiss": "تړل",
 	"timedmedia-reset-button-reset": "بياايښودل",
 	"timedmedia-subtitle-new-go": "ورځه",
-	"timedmedia-file": "دوتنه"
+	"timedmedia-file": "دوتنه",
+	"right-transcode-reset": "نابرياله يا ټرانسکوډشوې ويډيوگانې بيا واوڼئ؛ ترڅو دوی بيا د دندې په کتار کې وروټومبل شي",
+	"right-transcode-status": "د [[Special:TimedMediaHandler|وروستيو ټرانسکوډ شوو چارو په اړه مالومات]]",
+	"orphanedtimedtext": "يتيم مهال‌ليک مخونه",
+	"transcodestatistics": "ټرانسکود شمارنې"
 }
