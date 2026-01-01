@@ -59,7 +59,7 @@ class TimedMediaHandler extends MediaHandler {
 		} elseif ( $name === 'disablecontrols' ) {
 			$values = explode( ',', $value );
 			foreach ( $values as $v ) {
-				if ( !in_array( $v, [ 'options', 'timedText', 'fullscreen' ] ) ) {
+				if ( !in_array( $v, [ 'options', 'fullscreen' ] ) ) {
 					return false;
 				}
 			}
