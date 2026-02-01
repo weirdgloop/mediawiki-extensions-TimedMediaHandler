@@ -41,7 +41,11 @@ class SpecialTranscodeStatistics extends SpecialPage {
 		private readonly IConnectionProvider $dbProvider,
 		private readonly WANObjectCache $cache,
 	) {
-		parent::__construct( 'TranscodeStatistics', 'transcode-status' );
+		parent::__construct( 'TranscodeStatistics' );
+	}
+
+	public function getRestriction(): string {
+		return 'transcode-status';
 	}
 
 	/** @inheritDoc */
