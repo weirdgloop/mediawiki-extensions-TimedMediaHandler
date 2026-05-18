@@ -99,9 +99,15 @@ class MP4Handler extends ID3Handler {
 				$streamTypes[] = $metadata['audio']['codec'];
 			}
 		}
-		// id3 gives 'V_VP8' for what we call VP8
 		if ( isset( $metadata['video'] ) && $metadata['video']['dataformat'] === 'quicktime' ) {
-			$streamTypes[] = 'h.264';
+			if ( isset( $metadata['video']['codec'] )
+				&&
+				strpos( $metadata['video']['codec'], 'H.264' ) !== false
+			) {
+				$streamTypes[] = 'H.264';
+			} else {
+				$streamTypes[] = $metadata['video']['codec'];
+			}
 		}
 
 		return $streamTypes;
