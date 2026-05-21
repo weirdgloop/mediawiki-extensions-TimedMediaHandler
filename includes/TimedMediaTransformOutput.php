@@ -185,21 +185,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	}
 
 	/**
-	 * Helper to determine if to use pop up dialog for videos
-	 */
-	private function useImagePopUp(): bool {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-		// Check if the video is too small to play inline ( instead do a pop-up dialog )
-		// If we're filling the window (e.g. during an iframe embed) one probably doesn't want the pop-up.
-		// Also, the pop-up is broken in that case.
-		return $this->isVideo
-			&& !$this->fillwindow
-			&& $this->getPlayerWidth() < $config->get( 'MinimumVideoPlayerSize' )
-			// Do not do pop-up if it's going to be the same size as inline player anyways
-			&& $this->getPlayerWidth() < $this->getPopupPlayerWidth();
-	}
-
-	/**
 	 * XXX migrate this to the mediawiki Html class as 'tagSet' helper function
 	 */
 	private static function htmlTagSet( string $tagName, array $tagSet ): string {
@@ -244,7 +229,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	private function sortMediaByBandwidth( array $a, array $b ): int {
 		$width = $this->getPlayerWidth();
 		$maxWidth = $this->getPopupPlayerWidth();
-		if ( $this->useImagePopUp() || $width > $maxWidth ) {
+		if ( $width > $maxWidth ) {
 			// If it's a pop-up player than we should use the pop-up player size.
 			// If it's a normal player, but has a bigger width than the pop-up
 			// player, then we use the pop-up players width as the target width
