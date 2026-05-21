@@ -237,11 +237,15 @@ class OggHandler extends TimedMediaHandler {
 	 */
 	public function getStreamTypes( $file ) {
 		$streamTypes = [];
-		$metadata = $file->getMetadataArray();
-		foreach ( $metadata['streams'] ?? [] as $stream ) {
-			$streamTypes[] = $stream['type'];
+		$videoCodec = $this->findVideoStream( $file ) ?? false;
+		if ( $videoCodec ) {
+			$streamTypes[] = $videoCodec;
 		}
-		return array_unique( $streamTypes );
+		$audioCodec = $this->findAudioStream( $file ) ?? false;
+		if ( $audioCodec ) {
+			$streamTypes[] = $audioCodec;
+		}
+		return $streamTypes;
 	}
 
 	/**

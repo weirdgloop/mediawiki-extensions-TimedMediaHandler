@@ -36,15 +36,15 @@ class MPEGHandler extends ID3Handler {
 		if ( !$metadata || isset( $metadata['error'] ) ) {
 			return false;
 		}
+		$videoCodec = $metadata[ 'video' ][ 'codec' ] ?? false;
+		if ( $videoCodec ) {
+			$streamTypes[] = $videoCodec;
+		}
 		$audioFormat = $metadata[ 'audio' ][ 'dataformat' ] ?? false;
 		if ( $audioFormat === 'mp2' ) {
 			$streamTypes[] = 'MPEG-2';
 		} elseif ( $audioFormat ) {
 			$streamTypes[] = $audioFormat;
-		}
-		$videoCodec = $metadata[ 'video' ][ 'codec' ] ?? false;
-		if ( $videoCodec ) {
-			$streamTypes[] = $videoCodec;
 		}
 
 		return $streamTypes;

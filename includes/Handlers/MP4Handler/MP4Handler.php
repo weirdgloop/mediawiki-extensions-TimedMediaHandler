@@ -89,25 +89,21 @@ class MP4Handler extends ID3Handler {
 		if ( !$metadata || isset( $metadata['error'] ) ) {
 			return false;
 		}
-		if ( isset( $metadata['audio'] ) && $metadata['audio']['dataformat'] === 'mp4' ) {
-			if ( isset( $metadata['audio']['codec'] )
-				&&
-				strpos( $metadata['audio']['codec'], 'AAC' ) !== false
-			) {
-				$streamTypes[] = 'AAC';
-			} else {
-				$streamTypes[] = $metadata['audio']['codec'];
+		if ( isset( $metadata['video']['codec'] ) && $metadata['video']['dataformat'] === 'quicktime' ) {
+			$videoCodec = $metadata['video']['codec'];
+			if ( str_contains( $videoCodec, 'H.264' ) ) {
+				$videoCodec = 'H.264';
+			} elseif ( str_contains( $videoCodec, 'H.265' ) ) {
+				$videoCodec = 'H.265';
 			}
+			$streamTypes[] = $videoCodec;
 		}
-		if ( isset( $metadata['video'] ) && $metadata['video']['dataformat'] === 'quicktime' ) {
-			if ( isset( $metadata['video']['codec'] )
-				&&
-				strpos( $metadata['video']['codec'], 'H.264' ) !== false
-			) {
-				$streamTypes[] = 'H.264';
-			} else {
-				$streamTypes[] = $metadata['video']['codec'];
+		if ( isset( $metadata['audio']['codec'] ) && $metadata['audio']['dataformat'] === 'mp4' ) {
+			$audioCodec = $metadata['audio']['codec'];
+			if ( str_contains( $audioCodec, 'AAC' ) ) {
+				$audioCodec = 'AAC';
 			}
+			$streamTypes[] = $audioCodec;
 		}
 
 		return $streamTypes;
