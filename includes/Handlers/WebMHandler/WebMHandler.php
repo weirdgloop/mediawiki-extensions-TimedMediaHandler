@@ -109,7 +109,7 @@ class WebMHandler extends ID3Handler {
 	 */
 	public function getWebType( $file ) {
 		// Determine the base type (audio or video) based on file dimensions
-		$baseType = ( !$file->getWidth() && !$file->getHeight() ) ? 'audio' : 'video';
+		$baseType = $this->isAudio( $file ) ? 'audio' : 'video';
 
 		// Get the stream types (codecs) from the file metadata
 		$streams = $this->getStreamTypes( $file );

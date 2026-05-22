@@ -59,6 +59,9 @@ class MP4Handler extends ID3Handler {
 	 * @return string
 	 */
 	public function getWebType( $file ) {
+		if ( $this->isAudio( $file ) ) {
+			return 'audio/mp4';
+		}
 		// phpcs:disable Generic.Files.LineLength
 		/**
 		 * h.264 profile types:
@@ -89,7 +92,7 @@ class MP4Handler extends ID3Handler {
 		if ( !$metadata || isset( $metadata['error'] ) ) {
 			return false;
 		}
-		if ( isset( $metadata['video']['codec'] ) && $metadata['video']['dataformat'] === 'quicktime' ) {
+		if ( isset( $metadata['video']['codec'] ) ) {
 			$videoCodec = $metadata['video']['codec'];
 			if ( str_contains( $videoCodec, 'H.264' ) ) {
 				$videoCodec = 'H.264';
@@ -98,7 +101,7 @@ class MP4Handler extends ID3Handler {
 			}
 			$streamTypes[] = $videoCodec;
 		}
-		if ( isset( $metadata['audio']['codec'] ) && $metadata['audio']['dataformat'] === 'mp4' ) {
+		if ( isset( $metadata['audio']['codec'] ) ) {
 			$audioCodec = $metadata['audio']['codec'];
 			if ( str_contains( $audioCodec, 'AAC' ) ) {
 				$audioCodec = 'AAC';
