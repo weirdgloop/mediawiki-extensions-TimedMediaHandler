@@ -87,6 +87,12 @@ define("OGG_STREAM_CAPTURE_SPEEX",  "Speex   ");
  */
 define("OGG_STREAM_CAPTURE_FLAC",   "FLAC");
 /**
+ * Capture pattern for an Ogg FLAC v0 logical stream.
+ *
+ * @access  private
+ */
+define("OGG_STREAM_CAPTURE_FLAC0",   "fLaC");
+/**
  * Capture pattern for an Ogg Theora logical stream.
  *
  * @access  private
@@ -492,6 +498,9 @@ class File_Ogg
             } elseif (preg_match("/" . OGG_STREAM_CAPTURE_FLAC . "/", $pattern)) {
                 $this->_streamList[$stream_serial]['stream_type'] = OGG_STREAM_FLAC;
                 $stream = new File_Ogg_Flac($stream_serial, $streamData, $this->_filePointer);
+            } elseif (preg_match("/" . OGG_STREAM_CAPTURE_FLAC0 . "/", $pattern)) {
+                $this->_streamList[$stream_serial]['stream_type'] = OGG_STREAM_FLAC;
+                $stream = new File_Ogg_Flac0($stream_serial, $streamData, $this->_filePointer);
             } elseif (preg_match("/" . OGG_STREAM_CAPTURE_THEORA . "/", $pattern)) {
                 $this->_streamList[$stream_serial]['stream_type'] = OGG_STREAM_THEORA;
                 $stream = new File_Ogg_Theora($stream_serial, $streamData, $this->_filePointer);
@@ -564,6 +573,9 @@ class File_Ogg
             $stream_type = 0;
             switch (get_class($stream)) {
                 case "file_ogg_flac":
+                    $stream_type = OGG_STREAM_FLAC;
+                    break;
+                case "file_ogg_flac0":
                     $stream_type = OGG_STREAM_FLAC;
                     break;
                 case "file_ogg_speex":
