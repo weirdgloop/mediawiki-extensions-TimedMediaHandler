@@ -54,6 +54,10 @@ define("OGG_STREAM_FLAC",       4);
  * @access  public
  */
 define("OGG_STREAM_OPUS",       5);
+/**
+ * @access  public
+ */
+define("OGG_STREAM_VP8",        6);
 
 /**
  * Capture pattern to determine if a file is an Ogg physical stream.
@@ -103,6 +107,11 @@ define("OGG_STREAM_CAPTURE_THEORA", "theora");
  * @access  private
  */
 define("OGG_STREAM_CAPTURE_OPUS",  "OpusHead");
+/**
+ * Capture pattern for an Ogg VP8 logical stream.
+ * @access  private
+ */
+define("OGG_STREAM_CAPTURE_VP8",  "VP80");
 /**
  * Error thrown if the file location passed is nonexistant or unreadable.
  *
@@ -507,6 +516,9 @@ class File_Ogg
             } elseif (preg_match("/" . OGG_STREAM_CAPTURE_OPUS . "/", $pattern)) {
                 $this->_streamList[$stream_serial]['stream_type'] = OGG_STREAM_OPUS;
                 $stream = new File_Ogg_Opus($stream_serial, $streamData, $this->_filePointer);
+            } elseif (preg_match("/" . OGG_STREAM_CAPTURE_VP8 . "/", $pattern)) {
+                $this->_streamList[$stream_serial]['stream_type'] = OGG_STREAM_VP8;
+                $stream = new File_Ogg_VP8($stream_serial, $streamData, $this->_filePointer);
             } else {
                 $streamData['stream_type'] = "unknown";
                 $stream = false;
@@ -538,7 +550,7 @@ class File_Ogg
      *
      * This function returns a logical bitstream contained within the Ogg physical
      * stream, corresponding to the serial used as the offset for that bitstream.
-     * The returned stream may be Vorbis, Speex, FLAC or Theora, although the only
+     * The returned stream may be Vorbis, Speex, FLAC, Theora, Opus, or VP8, although the only
      * usable bitstream is Vorbis.
      *
      * @return File_Ogg_Bitstream
@@ -573,10 +585,11 @@ class File_Ogg
             $stream_type = 0;
             switch (get_class($stream)) {
                 case "file_ogg_flac":
-                    $stream_type = OGG_STREAM_FLAC;
-                    break;
                 case "file_ogg_flac0":
                     $stream_type = OGG_STREAM_FLAC;
+                    break;
+                case "file_ogg_opus":
+                    $stream_type = OGG_STREAM_OPUS;
                     break;
                 case "file_ogg_speex":
                     $stream_type = OGG_STREAM_SPEEX;
@@ -586,6 +599,9 @@ class File_Ogg
                     break;
                 case "file_ogg_vorbis":
                     $stream_type = OGG_STREAM_VORBIS;
+                    break;
+                case "file_ogg_vp8":
+                    $stream_type = OGG_STREAM_VP8;
                     break;
             }
             if (! isset($streams[$stream_type]))

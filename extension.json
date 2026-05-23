@@ -90,6 +90,7 @@
 		"File_Ogg_Speex": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Speex.php",
 		"File_Ogg_Theora": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Theora.php",
 		"File_Ogg_Vorbis": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Vorbis.php",
+		"File_Ogg_VP8": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/VP8.php",
 		"TimedMediaMaintenance": "maintenance/TimedMediaMaintenance.php"
 	},
 	"AutoloadNamespaces": {
