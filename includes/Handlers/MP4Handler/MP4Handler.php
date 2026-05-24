@@ -61,6 +61,9 @@ class MP4Handler extends ID3Handler {
 	public function getWebType( $file ) {
 		if ( $this->isAudio( $file ) ) {
 			return 'audio/mp4';
+		} elseif ( $this->getStreamTypes( $file )[0] === 'AV1' ) {
+			$videoCodec = $this->getAV1CodecString( $file );
+			return 'video/mp4; codecs="$videoCodec, mp4a.40.2"';
 		}
 		// phpcs:disable Generic.Files.LineLength
 		/**
