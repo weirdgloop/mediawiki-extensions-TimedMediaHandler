@@ -85,6 +85,7 @@
 		"File_Ogg": "includes/Handlers/OggHandler/File_Ogg/File/Ogg.php",
 		"File_Ogg_Bitstream": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Bitstream.php",
 		"File_Ogg_Flac": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Flac.php",
+		"File_Ogg_Flac0": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Flac0.php",
 		"File_Ogg_Media": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Media.php",
 		"File_Ogg_Opus": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Opus.php",
 		"File_Ogg_Speex": "includes/Handlers/OggHandler/File_Ogg/File/Ogg/Speex.php",
