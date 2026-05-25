@@ -63,7 +63,7 @@ class MP4Handler extends ID3Handler {
 			return 'audio/mp4';
 		} else {
 			$videoCodec = $this->getCodecString( $file ) ?: 'avc1.42E01E';
-			return 'video/mp4; codecs="$videoCodec, mp4a.40.2"';
+			return "video/mp4; codecs=\"{$videoCodec}, mp4a.40.2\"";
 		}
 	}
 
