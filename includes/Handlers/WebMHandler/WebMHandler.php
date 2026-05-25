@@ -121,7 +121,7 @@ class WebMHandler extends ID3Handler {
 		// Process codecs: Keep AV1 in original case, convert others to lowercase
 		$processedStreams = array_map( function ( $codec ) use ( $file ) {
 			if ( $codec === 'AV1' ) {
-				return $this->getAV1CodecString( $file );
+				return $this->getCodecString( $file );
 			}
 			return strtolower( $codec );
 		}, $streams );

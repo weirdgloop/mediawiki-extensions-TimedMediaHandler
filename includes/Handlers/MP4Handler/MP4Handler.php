@@ -61,28 +61,10 @@ class MP4Handler extends ID3Handler {
 	public function getWebType( $file ) {
 		if ( $this->isAudio( $file ) ) {
 			return 'audio/mp4';
-		} elseif ( $this->getStreamTypes( $file )[0] === 'AV1' ) {
-			$videoCodec = $this->getAV1CodecString( $file );
+		} else {
+			$videoCodec = $this->getCodecString( $file ) ?: 'avc1.42E01E';
 			return 'video/mp4; codecs="$videoCodec, mp4a.40.2"';
 		}
-		// phpcs:disable Generic.Files.LineLength
-		/**
-		 * h.264 profile types:
-		 *  H.264 Simple baseline profile video (main and extended video compatible) level 3 and Low-Complexity AAC audio in MP4 container:
-		 *  type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'
-		 *
-		 *  H.264 Extended profile video (baseline-compatible) level 3 and Low-Complexity AAC audio in MP4 container:
-		 *  type='video/mp4; codecs="avc1.58A01E, mp4a.40.2"'
-		 *
-		 *  H.264 Main profile video level 3 and Low-Complexity AAC audio in MP4 container
-		 *  type='video/mp4; codecs="avc1.4D401E, mp4a.40.2"'
-		 *
-		 *  H.264 ‘High’ profile video (incompatible with main, baseline, or extended profiles) level 3 and Low-Complexity AAC audio in MP4 container
-		 *  type='video/mp4; codecs="avc1.64001E, mp4a.40.2"'
-		 */
-		// phpcs:enable
-		// all h.264 encodes are currently simple profile
-		return 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
 	}
 
 	/**
