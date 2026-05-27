@@ -619,7 +619,8 @@ class WebVideoTranscode {
 		],
 		'opus' => [
 			'audioCodec' => 'opus',
-			'audioQuality' => '1',
+			// Audio quality is not supported by the libopus encoder.
+			//'audioQuality' => '1',
 			'samplerate' => '48000',
 			'noUpscaling' => 'true',
 			'novideo' => 'true',
