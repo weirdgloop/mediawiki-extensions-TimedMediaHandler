@@ -288,23 +288,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 		// constrained browsers (without js?) go with minimal source.)
 		usort( $mediaSources, [ $this, 'sortMediaByBandwidth' ] );
 
-		// WGL - Only include one source for each codec.
-		if ( count( $mediaSources ) > 1 ) {
-			$trimmedSources = [];
-			$seenCodecs = [];
-			foreach ( $mediaSources as &$source ) {
-				$codecs = ( $source['videoCodec'] ?? '' ) . ( $source['audioCodec'] ?? '' );
-				if ( in_array( $codecs, $seenCodecs ) ) {
-					continue;
-				}
-				if ( $codecs !== '' ) {
-					$seenCodecs[] = $codecs;
-				}
-				$trimmedSources[] = $source;
-			}
-			$mediaSources = $trimmedSources;
-		}
-
 		// We prefix some source attributes with data- to pass along to the javascript player
 		$prefixedSourceAttr = [
 			'width',
@@ -312,7 +295,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			'transcodekey',
 		];
 		$removeSourceAttr = [
-			'audioCodec',
 			'bandwidth',
 			'framerate',
 			'disablecontrols',
@@ -320,7 +302,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			'shorttitle',
 			'label',
 			'res',
-			'videoCodec',
 		];
 		foreach ( $mediaSources as &$source ) {
 			foreach ( $source as $attr => $val ) {

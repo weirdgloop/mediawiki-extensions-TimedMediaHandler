@@ -1201,15 +1201,6 @@ class WebVideoTranscode {
 			"height" => (int)$height,
 		];
 
-		// WGL - Include audio codec to be able to reduce the number of transcoded results.
-		if ( isset( static::$derivativeSettings[ $transcodeKey ][ 'audioCodec' ] ) ) {
-			$fields['audioCodec'] = static::$derivativeSettings[ $transcodeKey ][ 'audioCodec' ];
-		}
-		// WGL - Include video codec to be able to reduce the number of transcoded results.
-		if ( isset( static::$derivativeSettings[ $transcodeKey ][ 'videoCodec' ] ) ) {
-			$fields['videoCodec'] = static::$derivativeSettings[ $transcodeKey ][ 'videoCodec' ];
-		}
-
 		// a "ready" transcode should have a bitrate:
 		if ( isset( static::$transcodeState[$fileName] ) ) {
 			$fields["bandwidth"] = (int)static::$transcodeState[$fileName][$transcodeKey]['final_bitrate'];
