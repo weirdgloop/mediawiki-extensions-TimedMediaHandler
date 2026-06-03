@@ -14,7 +14,6 @@ use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\Shell\CommandFactory;
 use MediaWiki\Shell\Shell;
-use MediaWiki\TimedMediaHandler\HLS\Segmenter;
 use MediaWiki\TimedMediaHandler\TimedMediaHandler;
 use MediaWiki\Title\Title;
 use Shellbox\Command\BoxedCommand;
@@ -34,7 +33,6 @@ use Wikimedia\Rdbms\ILBFactory;
 class WebVideoTranscodeJob extends Job {
 
 	public ?TempFSFile $targetEncodeFile = null;
-	public ?TempFSFile $targetPlaylistFile = null;
 	/** @var File|false */
 	public $file;
 	private ?string $remuxVirtualUrl = null;
@@ -94,13 +92,6 @@ class WebVideoTranscodeJob extends Job {
 		return $this->targetEncodeFile->getPath();
 	}
 
-	private function getTargetPlaylistPath(): string {
-		if ( !$this->targetPlaylistFile ) {
-			$this->targetPlaylistFile = $this->fileTarget( '.m3u8' );
-		}
-		return $this->targetPlaylistFile->getPath();
-	}
-
 	private function fileTarget( string $suffix = '' ): TempFSFile {
 		$base = $this->getFile();
 		$transcodeKey = $this->params[ 'transcodeKey' ];
@@ -119,10 +110,6 @@ class WebVideoTranscodeJob extends Job {
 		if ( $this->targetEncodeFile ) {
 			$this->targetEncodeFile->purge();
 			$this->targetEncodeFile = null;
-		}
-		if ( $this->targetPlaylistFile ) {
-			$this->targetPlaylistFile->purge();
-			$this->targetPlaylistFile = null;
 		}
 	}
 
@@ -241,7 +228,6 @@ class WebVideoTranscodeJob extends Job {
 			$this->lbFactory->closeAll( __METHOD__ );
 
 			// Check the codec see which encode method to call;
-			$streaming = $options['streaming'] ?? false;
 			$videoCodec = $options['videoCodec'] ?? '';
 			$codecs = [ 'vp8', 'vp9', 'h264', 'h263', 'mpeg4', 'mjpeg' ];
 			$twopass = isset( $options['twopass'] );
@@ -324,27 +310,6 @@ class WebVideoTranscodeJob extends Job {
 				$mediaFilename = WebVideoTranscode::getTranscodeFileBaseName( $file, $transcodeKey );
 				$mediaPath = WebVideoTranscode::getDerivativeFilePath( $file, $transcodeKey );
 				$storeOptions = null;
-				$playlistStoreOptions = null;
-
-				if ( $streaming === 'hls' ) {
-					$playlistKey = $transcodeKey . '.m3u8';
-					$playlistFilename = WebVideoTranscode::getTranscodeFileBaseName( $file, $playlistKey );
-					$playlistPath = WebVideoTranscode::getDerivativeFilePath( $file, $playlistKey );
-					$playlistTemp = $this->getTargetPlaylistPath();
-
-					$segmenter = Segmenter::segment( $this->getTargetEncodePath() );
-					// @fixme put the 10-second segment target in a constant somewhere
-					$segmenter->consolidate( 10 );
-					$segmenter->rewrite();
-					$playlist = $segmenter->playlist( 10, $mediaFilename );
-
-					file_put_contents( $playlistTemp, $playlist );
-					$playlistStoreOptions = [];
-					$playlistStoreOptions['headers']['Content-Type'] = 'application/vnd.apple.mpegurl; charset=utf-8';
-				} else {
-					$playlistTemp = null;
-					$playlistPath = null;
-				}
 
 				if (
 					strpos( $options['type'], '/ogg' ) !== false &&
@@ -369,18 +334,6 @@ class WebVideoTranscodeJob extends Job {
 					$mediaPath,
 					$storeOptions
 				);
-				if ( $result->isOK() && $streaming === 'hls' && $playlistTemp && $playlistPath ) {
-					$result = $file->getRepo()->quickImport(
-						// temp file
-						$playlistTemp,
-						// storage
-						$playlistPath,
-						$playlistStoreOptions
-					);
-					if ( $result->isOK() ) {
-						WebVideoTranscode::updateStreamingManifests( $file );
-					}
-				}
 
 				if ( !$result->isOK() ) {
 					// no need to invalidate all pages with video.
@@ -431,9 +384,6 @@ class WebVideoTranscodeJob extends Job {
 
 			$url = WebVideoTranscode::getTranscodedUrlForFile( $file, $transcodeKey );
 			$urls = [ $url ];
-			if ( $streaming === 'hls' ) {
-				$urls[] = "$url.m3u8";
-			}
 			$update = new CdnCacheUpdate( $urls );
 			$update->doUpdate();
 
@@ -491,7 +441,6 @@ class WebVideoTranscodeJob extends Job {
 
 		$interval = 10;
 		$fps = 0;
-		$streaming = $options['streaming'] ?? false;
 		$transcodeKey = $this->params[ 'transcodeKey' ];
 		$extension = substr( $transcodeKey, strrpos( $transcodeKey, '.' ) + 1 );
 
@@ -547,7 +496,7 @@ class WebVideoTranscodeJob extends Job {
 				}
 			}
 
-			// needed for 2-pass & streaming to override file type detection
+			// needed for 2-pass to override file type detection
 			switch ( $extension ) {
 				case 'webm':
 				case 'mp3':
@@ -630,36 +579,6 @@ class WebVideoTranscodeJob extends Job {
 
 		if ( WebVideoTranscode::isBaseMediaFormat( $extension ) ) {
 			$optsEnv['TMH_MOVFLAGS'] = '-movflags +faststart';
-		}
-
-		if ( $streaming === 'hls' ) {
-			if ( WebVideoTranscode::isBaseMediaFormat( $extension ) ) {
-				if ( !isset( $optsEnv['TMH_MOVFLAGS'] ) ) {
-					$optsEnv['TMH_MOVFLAGS'] = '';
-				}
-				// Don't use the HLS muxer, as it'll want to manage
-				// filenames and we have to rewrite everything anyway.
-				// We'll generate an .m3u8 from the file structure after.
-
-				if ( isset( $options['novideo'] ) || isset( $options['intraframe'] ) ) {
-					// Audio-only tracks should be fragmented around the standard interval.
-					// Intraframe-only codecs like Motion-JPEG should also be treated this way.
-					$optsEnv['TMH_MOVFLAGS'] .= " -movflags +empty_moov+default_base_moof";
-					$optsEnv['TMH_MOVFLAGS'] .= " -frag_duration {$interval}000000";
-				} else {
-					// Video keyframe interval is set to approximate the desired interval, but
-					// they may occur whenever the encoder thinks they would be desirable such
-					// as a visible scene change.
-					$optsEnv['TMH_MOVFLAGS'] .= " -movflags +frag_keyframe+empty_moov+default_base_moof";
-				}
-
-				// This is needed for opus on debian bullseye
-				$optsEnv['TMH_MOVFLAGS'] .= " -strict experimental";
-			} elseif ( $extension === 'mp3' ) {
-				// No additional options needed at present.
-			} else {
-				return "Invalid HLS track media type, expected .mp4, .m4v, .m4a, .mov, .3gp, or .mp3";
-			}
 		}
 
 		$cmd = $this->getCommand( 'ffmpegencode' );

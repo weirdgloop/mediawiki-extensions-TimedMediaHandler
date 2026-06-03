@@ -31,7 +31,6 @@ use MediaWiki\TimedMediaHandler\Handlers\MP3Handler\MP3Handler;
 use MediaWiki\TimedMediaHandler\Handlers\MP4Handler\MP4Handler;
 use MediaWiki\TimedMediaHandler\Handlers\OggHandler\OggHandler;
 use MediaWiki\TimedMediaHandler\Handlers\WAVHandler\WAVHandler;
-use MediaWiki\TimedMediaHandler\HLS\Multivariant;
 use MediaWiki\Title\Title;
 use Wikimedia\FileBackend\FSFile\TempFSFile;
 use Wikimedia\FileBackend\FSFile\TempFSFileFactory;
@@ -55,140 +54,6 @@ class WebVideoTranscode {
 	 */
 	public static $derivativeSettings = [
 
-		// WebM VP8/Vorbis transcodes
-		//
-		// Two-pass encoding is a bit slower, but *massively* improves bitrate control.
-		// Trading off speed using the '-speed 3' parameter on the second pass.
-		//
-		// The current defaults do not include VP8 output, but it may be helpful
-		// at a limited resolution range for certain back-compatibility scenarios.
-		'160p.webm' => [
-			'maxSize' => '288x160',
-			'videoBitrate' => '193k',
-			'minrate' => '96k',
-			'maxrate' => '280k',
-			'crf' => '37',
-			'speed' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'240p.webm' => [
-			'maxSize' => '426x240',
-			'videoBitrate' => '385k',
-			'minrate' => '193k',
-			'maxrate' => '558k',
-			'crf' => '37',
-			'speed' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'360p.webm' => [
-			'maxSize' => '640x360',
-			'videoBitrate' => '767k',
-			'minrate' => '383k',
-			'maxrate' => '1112k',
-			'crf' => '36',
-			'speed' => '3',
-			'slices' => '2',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'480p.webm' => [
-			'maxSize' => '854x480',
-			'videoBitrate' => '1250k',
-			'minrate' => '625k',
-			'maxrate' => '1813k',
-			'crf' => '33',
-			'speed' => '3',
-			'slices' => '2',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'720p.webm' => [
-			'maxSize' => '1280x720',
-			'videoBitrate' => '2491k',
-			'minrate' => '1246k',
-			'maxrate' => '3612k',
-			'crf' => '32',
-			'speed' => '3',
-			'slices' => '4',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'1080p.webm' => [
-			'maxSize' => '1920x1080',
-			'videoBitrate' => '4963k',
-			'minrate' => '2482k',
-			'maxrate' => '7197k',
-			'crf' => '31',
-			'speed' => '3',
-			'slices' => '4',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'1440p.webm' => [
-			'maxSize' => '2560x1440',
-			'videoBitrate' => '8094k',
-			'minrate' => '4047k',
-			'maxrate' => '11736k',
-			'crf' => '24',
-			'speed' => '2',
-			'slices' => '8',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-		'2160p.webm' => [
-			'maxSize' => '3840x2160',
-			'videoBitrate' => '16126k',
-			'minrate' => '8063k',
-			'maxrate' => '23382k',
-			'crf' => '15',
-			'speed' => '2',
-			'slices' => '8',
-			'twopass' => 'true',
-			'videoCodec' => 'vp8',
-			'audioCodec' => 'vorbis',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'video/webm; codecs="vp8, vorbis"',
-		],
-
 		// WebM VP9 transcode:
 		//
 		// Two-pass encoding is a bit slower, but *massively* improves bitrate control.
@@ -199,32 +64,6 @@ class WebVideoTranscode {
 		// Ultra-HD can use up to 16 threads. Be sure to set $wgFFmpegThreads to a suitable
 		// maximum values!
 		//
-		'120p.vp9.webm' => [
-			'maxSize' => '213x120',
-			'videoBitrate' => '95k',
-			'minrate' => '47k',
-			'maxrate' => '137k',
-			'crf' => '37',
-			'speed' => '3',
-			'videoCodec' => 'vp9',
-			'twopass' => 'true',
-			'audioCodec' => 'opus',
-			'audioBitrate' => '96k',
-			'type' => 'video/webm; codecs="vp9, opus"',
-		],
-		'180p.vp9.webm' => [
-			'maxSize' => '320x180',
-			'videoBitrate' => '189k',
-			'minrate' => '94k',
-			'maxrate' => '274k',
-			'crf' => '37',
-			'speed' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'audioCodec' => 'opus',
-			'audioBitrate' => '96k',
-			'type' => 'video/webm; codecs="vp9, opus"',
-		],
 		'240p.vp9.webm' => [
 			'maxSize' => '426x240',
 			'videoBitrate' => '308k',
@@ -323,220 +162,18 @@ class WebVideoTranscode {
 			'type' => 'video/webm; codecs="vp9, opus"',
 		],
 
-		// Adaptive streaming transcodes:
-		// * stereo.audio.mp3 audio (for Safari 16 and below)
-		// * stereo.audio.opus.mp4 audio (for Chromium, Firefox, Safari 17)
-		// * surround.audio.opus.mp4 audio (reserved for future expansion)
-		// * 144p.video.mjpeg.mov fallback video for old iOS (optional)
-		// * 180p .. 480p.video.mpeg4.mp4 fallback video for old iOS (optional)
-		// * 240p .. 2160p.video.vp9.mp4 video
-		// * .m3u8 playlists
-		//
-		'stereo.audio.mp3' => [
-			'novideo' => 'true',
-			'audioCodec' => 'mp3',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '128k',
-			'type' => 'audio/mpeg',
-			'streaming' => 'hls',
-		],
-		'stereo.audio.opus.mp4' => [
-			'novideo' => 'true',
-			'audioCodec' => 'opus',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'audioBitrate' => '96k',
-			'type' => 'audio/mp4; codecs="opus"',
-			'streaming' => 'hls',
-		],
-		/*
-		// @todo implement surround support for input
-		// with >2 channels. note safari doesn't grok
-		// opus surround.
-		'surround.audio.opus.mp4' => [
-			'novideo' => true,
-			'audioCodec' => 'opus',
-			'samplerate' => '48000',
-			'minChannels' => 3,
-			'audioBitrate' => '256k',
-			'type' => 'audio/mp4; codecs="opus"',
-			'streaming' => 'hls',
-		],
-		*/
-
-		// Optional back-compat for iOS before 17.4 (which adds consistent WebM)
-		// Flat files because HLS support varies based on iOS version
-		//
-		// Motion-JPEG compresses very poorly, but works consistently.
-		// AAC-LC for the audio track:
-		'144p.mjpeg.mov' => [
-			'maxSize' => '256x144',
-			'fpsmax' => '30',
-			'videoBitrate' => '1000k',
-			'videoCodec' => 'mjpeg',
-			'audioCodec' => 'mp3',
-			'audioBitrate' => '128k',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'type' => 'video/quicktime'
-		],
-		// MPEG-4 Visual compresses a lot better, and allows a more
-		// suitable resolution for online viewing.
-		// AAC-LC for the audio track:
-		'360p.mpeg4.mov' => [
-			'maxSize' => '640x360',
-			'videoBitrate' => '1000k',
-			'twopass' => 'true',
-			'videoCodec' => 'mpeg4',
-			'audioCodec' => 'mp3',
-			'audioBitrate' => '128k',
-			'samplerate' => '48000',
-			'channels' => '2',
-			'type' => 'video/quicktime',
-		],
-		// Streaming Motion-JPEG track
-		//
-		// These are video-only, in fragmented .mov that allows adaptive streaming
-		// with chunks split at fragment boundaries listed in an associated .m3u8
-		// streaming playlist. MJPEG works with iOS on hardware that doesn't support
-		// the VP9 codec, but is poorly compressed for the low resolution.
-		'144p.video.mjpeg.mov' => [
-			'width' => '176',
-			'height' => '144',
-			'fpsmax' => '30',
-			'videoBitrate' => '1000k',
-			'videoCodec' => 'mjpeg',
-			'noaudio' => 'true',
-			'type' => 'video/quicktime; codecs="jpeg"',
-			'streaming' => 'hls',
-			'intraframe' => true,
-		],
-
-		// VP9 streaming tracks
-		//
-		// These are video-only, in fragmented .mp4 that allows adaptive streaming
-		// with chunks split at fragment boundaries listed in an associated .m3u8
-		// streaming playlist.
-		//
-		// The 'remuxFrom' key specifies that if a WebM tracks was previously made,
-		// it can be used as a data source via remuxing packets instead of doing
-		// a fresh encoding when doing bulk conversions with requeueTranscodes.php
-		// with the '--remux' option.
-		'240p.video.vp9.mp4' => [
-			'maxSize' => '426x240',
-			'videoBitrate' => '308k',
-			'crf' => '37',
-			'speed' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '240p.vp9.webm' ],
-		],
-		'360p.video.vp9.mp4' => [
-			'maxSize' => '640x360',
-			'videoBitrate' => '613k',
-			'crf' => '36',
-			'speed' => '3',
-			'tileColumns' => '1',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '360p.vp9.webm' ],
-		],
-		'480p.video.vp9.mp4' => [
-			'maxSize' => '854x480',
-			'videoBitrate' => '1000k',
-			'crf' => '33',
-			'speed' => '3',
-			'tileColumns' => '1',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '480p.vp9.webm' ],
-		],
-		'720p.video.vp9.mp4' => [
-			'maxSize' => '1280x720',
-			'videoBitrate' => '1993k',
-			'crf' => '32',
-			'speed' => '3',
-			'tileColumns' => '2',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '720p.vp9.webm' ],
-		],
-		'1080p.video.vp9.mp4' => [
-			'maxSize' => '1920x1080',
-			'videoBitrate' => '3971k',
-			'crf' => '31',
-			'speed' => '3',
-			'tileColumns' => '2',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '1080p.vp9.webm' ],
-		],
-		'1440p.video.vp9.mp4' => [
-			'maxSize' => '2560x1440',
-			'videoBitrate' => '6475k',
-			'crf' => '24',
-			'speed' => '3',
-			'tileColumns' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '1440p.vp9.webm' ],
-		],
-		'2160p.video.vp9.mp4' => [
-			'maxSize' => '3840x2160',
-			'videoBitrate' => '12900k',
-			'crf' => '15',
-			'speed' => '3',
-			'tileColumns' => '3',
-			'twopass' => 'true',
-			'videoCodec' => 'vp9',
-			'noaudio' => 'true',
-			'type' => 'video/mp4; codecs="vp09.00.51.08"',
-			'streaming' => 'hls',
-			'remuxFrom' => [ '2160p.vp9.webm' ],
-		],
-
 		// Loosely defined per PCF guide to mp4 profiles:
 		// https://develop.participatoryculture.org/index.php/ConversionMatrix
 		// and apple HLS profile guide:
 		// https://developer.apple.com/library/ios/#documentation/networkinginternet/conceptual/streamingmediaguide/UsingHTTPLiveStreaming/UsingHTTPLiveStreaming.html#//apple_ref/doc/uid/TP40008332-CH102-DontLinkElementID_24
 
 		// high profile
-		// level 2 needed for 160p60
 		// level 2.1 needed for 240p60
 		// level 3 needed for 360p60, 480p60
 		// level 4 needed for 720p60, 1080p30
 		// level 4.1 needed for 1080p60
 		// level 5 needed for 1440p60, 2160p30
 		// level 5.1 needed for 2160p60
-
-		// deprecated
-		'160p.mp4' => [
-			'maxSize' => '288x160',
-			'videoCodec' => 'h264',
-			'videoBitrate' => '154k',
-			'audioCodec' => 'aac',
-			'audioBitrate' => '112k',
-			'type' => 'video/mp4; codecs="avc1.640014, mp4a.40.2"',
-		],
 
 		'240p.mp4' => [
 			'maxSize' => '426x240',
@@ -546,17 +183,6 @@ class WebVideoTranscode {
 			'audioBitrate' => '112k',
 			'type' => 'video/mp4; codecs="avc1.42E015, mp4a.40.2"',
 		],
-
-		// deprecated
-		'320p.mp4' => [
-			'maxSize' => '480x320',
-			'videoCodec' => 'h264',
-			'videoBitrate' => '460k',
-			'audioCodec' => 'aac',
-			'audioBitrate' => '112k',
-			'type' => 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"',
-		],
-
 		'360p.mp4' => [
 			'maxSize' => '640x360',
 			'videoCodec' => 'h264',
@@ -881,60 +507,14 @@ class WebVideoTranscode {
 			$transcodeSet = static::enabledVideoTranscodes();
 		}
 
-		$lastHLS = null;
 		foreach ( $transcodeSet as $transcodeKey ) {
-			if ( static::isTranscodeKeyPlayable( $transcodeKey ) &&
-				 static::isTranscodeEnabled( $file, $transcodeKey )
-			) {
+			if ( static::isTranscodeEnabled( $file, $transcodeKey ) ) {
 				// Try and add the source
 				static::addSourceIfReady( $file, $sources, $transcodeKey, $options );
 			}
-			$streaming = static::$derivativeSettings[$transcodeKey]['streaming'] ?? '';
-			if ( $streaming === 'hls' && static::isTranscodeReady( $file, $transcodeKey ) ) {
-				$lastHLS = $transcodeKey;
-			}
-		}
-		if ( $lastHLS ) {
-			$src = static::getTranscodedUrlForFile( $file, 'm3u8' );
-			$settings =& static::$derivativeSettings[$lastHLS];
-			[ $width, $height ] = static::getMaxSizeTransform(
-				$file,
-				$settings['maxSize'] ?? (
-					implode( 'x', [
-						$settings['width'] ?? '0',
-						$settings['height'] ?? '0',
-					] )
-				)
-			);
-			$sources[] = [
-				'src' => $src,
-				'title' => wfMessage( 'timedmedia-derivative-desc-m3u8' )->text(),
-				'type' => 'application/vnd.apple.mpegurl',
-				'shorttitle' => wfMessage( 'timedmedia-derivative-desc-m3u8' )->text(),
-				'transcodekey' => 'm3u8',
-				'width' => $width,
-				'height' => $height,
-			];
 		}
 
 		return $sources;
-	}
-
-	/**
-	 * Does this transcode key represent a directly-playable type?
-	 * If not it's a backing track for adaptive streaming, and should
-	 * not be exposed directly as a downloadable/playable derivative.
-	 *
-	 * @param string $transcodeKey
-	 * @return bool
-	 */
-	public static function isTranscodeKeyPlayable( $transcodeKey ) {
-		$settings = static::$derivativeSettings[$transcodeKey] ?? null;
-		if ( !$settings ) {
-			return false;
-		}
-		$streaming = $settings['streaming'] ?? false;
-		return !$streaming;
 	}
 
 	/**
@@ -1039,25 +619,11 @@ class WebVideoTranscode {
 		// Remove files by key:
 		$urlsToPurge = [];
 		$filesToPurge = [];
-		$hasHLS = false;
 		foreach ( $removeKeys as $tKey ) {
 			$urlPath = static::getTranscodedUrlForFile( $file, $tKey );
 			$filePath = static::getDerivativeFilePath( $file, $tKey );
 			$urlsToPurge[] = $urlPath;
 			$filesToPurge[] = $filePath;
-
-			$options = static::$derivativeSettings[$tKey] ?? [];
-			$streaming = $options['streaming'] ?? null;
-			if ( $streaming === 'hls' ) {
-				$urlsToPurge[] = $urlPath . '.m3u8';
-				$filesToPurge[] = $filePath . '.m3u8';
-				$hasHLS = true;
-			}
-		}
-		if ( $hasHLS && $transcodeKey === false ) {
-			// Delete all derivatives including the main hls manifest
-			$urlsToPurge[] = static::getTranscodedUrlForFile( $file, 'm3u8' );
-			$filesToPurge[] = static::getDerivativeFilePath( $file, 'm3u8' );
 		}
 		foreach ( $filesToPurge as $filePath ) {
 			if ( $file->repo->fileExists( $filePath ) ) {
@@ -1088,10 +654,6 @@ class WebVideoTranscode {
 
 		// Remove from local WebVideoTranscode cache:
 		static::clearTranscodeCache( $titleObj->getDBkey() );
-		if ( $transcodeKey !== false ) {
-			// We only removed a single transcode, so we need to update the manifests
-			static::updateStreamingManifests( $file );
-		}
 	}
 
 	/**
@@ -1227,68 +789,6 @@ class WebVideoTranscode {
 	}
 
 	/**
-	 * Regenerate the streaming manifests, currently the HLS multivariant playlist,
-	 * to refer to available completed transcodes. If there are no available
-	 * compatible transcodes the playlist will be written out empty.
-	 *
-	 * Simultaneous attempts to overwrite will result in whichever commits to
-	 * the filesystem or other backend last "winning". Locks in the database
-	 * have been known to cause production problems, and a more thorough queueing
-	 * system might be wise to look into later.
-	 *
-	 * @param File $file base file to check for transcodes on
-	 */
-	public static function updateStreamingManifests( File $file ): Status {
-		$fileName = $file->getTitle()->getDBkey();
-		$repo = $file->getRepo();
-		if ( !is_a( $repo, 'LocalRepo' ) ) {
-			return Status::newGood();
-		}
-		$dbw = $repo->getPrimaryDB();
-
-		// Note that trying to use a database lock here plays hell with many
-		// many scenarios in production, it seems, especially when deleting
-		// files.
-		//
-		// See [T348689](https://phabricator.wikimedia.org/T348689) etc.
-		//
-		// To in future: serialize these updates through the job queue
-		// or something else *clever* and non-destructive in terms of wait
-		// states.
-
-		static::clearTranscodeCache( $fileName );
-
-		// Currently only HLS streaming is output.
-		$m3u8 = "$fileName.m3u8";
-		$keys = [];
-		foreach ( static::$derivativeSettings as $key => $settings ) {
-			$streaming = $settings['streaming'] ?? '';
-			if ( $streaming === 'hls' && static::isTranscodeReady( $file, $key ) ) {
-				$keys[] = $key;
-			}
-		}
-		// @todo look up the frame rate and final bitrates and use those
-		$multivariant = new Multivariant( $fileName, $keys );
-		$playlist = $multivariant->playlist();
-
-		$tmpFileFactory = new TempFSFileFactory();
-		$tmpFile = $tmpFileFactory->newTempFSFile( $m3u8, 'm3u8' );
-		if ( !$tmpFile ) {
-			return Status::newFatal( 'm3u8-error-create-temp', $m3u8 );
-		}
-		$result = file_put_contents( $tmpFile->getPath(), $playlist );
-		if ( $result === false ) {
-			return Status::newFatal( 'm3u8-error-write-temp', $m3u8 );
-		}
-
-		$result = $repo->quickImport(
-			$tmpFile,
-			$file->getTranscodedPath( $m3u8 )
-		);
-		return $result;
-	}
-
-	/**
 	 * Make sure all relevant transcodes for the given file are tracked in the
 	 * transcodes table; add entries for any missing ones.
 	 *
@@ -1353,13 +853,6 @@ class WebVideoTranscode {
 				$sourceCodecs = $handler->getStreamTypes( $file );
 				$sourceCodec = $sourceCodecs ? strtolower( $sourceCodecs[0] ) : '';
 				return ( $sourceCodec !== $settings['audioCodec'] );
-			}
-			$streaming = $settings['streaming'] ?? false;
-			$novideo = $settings['novideo'] ?? false;
-			if ( $streaming && $novideo ) {
-				// Streaming audio should be generated for all formats
-				// if audio is present on the file, and for none if not.
-				return $handler->hasAudio( $file );
 			}
 			if ( static::isTargetLargerThanFile( $file, $settings['maxSize'] ?? '' ) ) {
 				// Are we the smallest enabled transcode for this type?
