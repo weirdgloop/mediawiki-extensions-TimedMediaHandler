@@ -353,6 +353,37 @@ class WebVideoTranscode {
 	}
 
 	/**
+	 * Give a rough estimate on bitrate or the actual bitrate if possible.
+	 * Note this is not always accurate.. especially with variable bitrate codecs ;)
+	 * @param File $file
+	 * @param string $transcodeKey
+	 * @suppress PhanTypePossiblyInvalidDimOffset
+	 * @return int
+	 */
+	public static function getProjectedBitrate( $file, $transcodeKey ) {
+		$fileName = $file->getTitle()->getDBkey();
+		// Return the actual bitrate if possible.
+		if ( ( static::$transcodeState[$fileName][$transcodeKey]['time_success'] ?? null ) !== null ) {
+			return (int)static::$transcodeState[$fileName][$transcodeKey]['final_bitrate'];
+		}
+		// Otherwise estimate the bitrate.
+		$bitrate = 0;
+		/** @var ID3Handler $handler */
+		$handler = $file->getHandler();
+		if ( $handler->hasVideo( $file ) ) {
+			$bitrate += static::expandRate( static::$derivativeSettings[ $transcodeKey ][ 'videoBitrate' ] ?? 0 );
+		}
+		if ( $handler->hasAudio( $file ) ) {
+			$bitrate += static::expandRate( static::$derivativeSettings[ $transcodeKey ][ 'audioBitrate' ] ?? 0 );
+		}
+		// Fallback to source bitrate.
+		if ( $bitrate === 0 ) {
+			return $handler->getBitrate( $file );
+		}
+		return $bitrate;
+	}
+
+	/**
 	 * Give a rough estimate on file size
 	 * Note this is not always accurate.. especially with variable bitrate codecs ;)
 	 * @param File $file
@@ -361,22 +392,7 @@ class WebVideoTranscode {
 	 * @return int
 	 */
 	public static function getProjectedFileSize( $file, $transcodeKey ) {
-		$settings = static::$derivativeSettings[$transcodeKey];
-		// FIXME broken, as bitrate settings can contain units (64k)
-		if ( $settings[ 'videoBitrate' ] && $settings['audioBitrate'] ) {
-			return $file->getLength() * 8 * (
-				(int)$settings['videoBitrate']
-				+
-				(int)$settings['audioBitrate']
-			);
-		}
-		// Else just return the size of the source video
-		// ( we have no idea how large the actual derivative size will be )
-
-		/** @var ID3Handler $handler */
-		$handler = $file->getHandler();
-		'@phan-var ID3Handler $handler';
-		return $file->getLength() * $handler->getBitrate( $file ) * 8;
+		return $file->getLength() * static::getProjectedBitrate( $file, $transcodeKey ) * 8;
 	}
 
 	/**
@@ -763,10 +779,8 @@ class WebVideoTranscode {
 			"height" => (int)$height,
 		];
 
-		// a "ready" transcode should have a bitrate:
-		if ( isset( static::$transcodeState[$fileName] ) ) {
-			$fields["bandwidth"] = (int)static::$transcodeState[$fileName][$transcodeKey]['final_bitrate'];
-		}
+		$fields['bandwidth'] = static::getProjectedBitrate( $file, $transcodeKey );
+
 		return $fields;
 	}
 

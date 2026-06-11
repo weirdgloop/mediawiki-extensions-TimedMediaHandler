@@ -110,7 +110,7 @@ class TranscodeStatusTable {
 			$transcodeRowsForTemplate[] = [
 				'transcodeKey' => $transcodeKey,
 				'msg-derivative-key' => wfMessage( 'timedmedia-derivative-' . $transcodeKey ),
-				'bitrate' => $this->getTranscodeBitrate( $file, $state ),
+				'bitrate' => $this->getTranscodeBitrate( $file, $transcodeKey ),
 				'transcode-success' => $state['time_success'] !== null,
 				'msg-timedmedia-download' => wfMessage( 'timedmedia-download' ),
 				// Download file
@@ -158,11 +158,8 @@ class TranscodeStatusTable {
 		return '';
 	}
 
-	public function getTranscodeBitrate( File $file, array $state ): string {
-		if ( $state['time_success'] !== null ) {
-			return $this->context->getLanguage()->formatBitrate( $state['final_bitrate'] );
-		}
-		return '';
+	public function getTranscodeBitrate( File $file, string $transcodeKey ): string {
+		return $this->context->getLanguage()->formatBitrate( WebVideoTranscode::getProjectedBitrate( $file, $transcodeKey ) );
 	}
 
 	public static function getStatusMsg( File $file, array $state ): string {
