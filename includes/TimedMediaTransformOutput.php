@@ -239,31 +239,11 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			return 0;
 		});
 
-		// We prefix some source attributes with data- to pass along to the javascript player
-		$prefixedSourceAttr = [
-			'width',
-			'height',
-			'transcodekey',
-		];
-		$removeSourceAttr = [
-			'bandwidth',
-			'framerate',
-			'disablecontrols',
-			'title',
-			'shorttitle',
-			'label',
-			'res',
-		];
 		foreach ( $mediaSources as &$source ) {
-			foreach ( $source as $attr => $val ) {
-				if ( in_array( $attr, $removeSourceAttr, true ) ) {
-					unset( $source[ $attr ] );
-				}
-				if ( in_array( $attr, $prefixedSourceAttr, true ) ) {
-					$source[ 'data-' . $attr ] = $val;
-					unset( $source[ $attr ] );
-				}
-			}
+			$source = [
+				'src' => $source['src'],
+				'type' => $source['type'],
+			];
 		}
 		unset( $source );
 
