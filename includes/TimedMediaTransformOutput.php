@@ -199,70 +199,6 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 	}
 
 	/**
-	 * Get target popup player size
-	 * @return int[]
-	 */
-	private function getPopupPlayerSize(): array {
-		// Get the max width from the enabled transcode settings:
-		$maxImageSize = WebVideoTranscode::getMaxSizeWebStream();
-		return WebVideoTranscode::getMaxSizeTransform( $this->file, (string)$maxImageSize );
-	}
-
-	/**
-	 * Helper function to get pop up width
-	 *
-	 * Silly function because array index operations aren't allowed
-	 * on function calls before php 5.4
-	 */
-	private function getPopupPlayerWidth(): int {
-		[ $popUpWidth ] = $this->getPopupPlayerSize();
-		return $popUpWidth;
-	}
-
-	/**
-	 * Sort media by bandwidth, but with things not wide enough at end
-	 *
-	 * The list should be in preferred source order, so we want the file
-	 * with the lowest bitrate (to save bandwidth) first, but we also want
-	 * appropriate resolution files before the 160p transcodes.
-	 */
-	private function sortMediaByBandwidth( array $a, array $b ): int {
-		$width = $this->getPlayerWidth();
-		$maxWidth = $this->getPopupPlayerWidth();
-		if ( $width > $maxWidth ) {
-			// If it's a pop-up player than we should use the pop-up player size.
-			// If it's a normal player, but has a bigger width than the pop-up
-			// player, then we use the pop-up players width as the target width
-			// as that is equivalent to the max transcode size. Otherwise, this
-			// will suggest the original file as the best source, which seems like
-			// a potentially bad idea, as it could be anything size wise.
-			$width = $maxWidth;
-		}
-
-		if ( $a['width'] < $width && $b['width'] >= $width ) {
-			// $a is not wide enough but $b is, so we
-			// consider $a > $b as we want $b before $a
-			return 1;
-		}
-		if ( $a['width'] >= $width && $b['width'] < $width ) {
-			// $b not wide enough, so $a must be preferred.
-			return -1;
-		}
-		if ( $a['width'] < $width && $b['width'] < $width && $a['width'] != $b['width'] ) {
-			// both are too small. Go with the one closer to the target width
-			return ( $a['width'] < $b['width'] ) ? -1 : 1;
-		}
-		// Both are big enough, or both equally too small. Go with the one
-		// that has a lower bit-rate (as it will be faster to download).
-		if ( isset( $a['bandwidth'] ) && isset( $b['bandwidth'] ) ) {
-			return ( $a['bandwidth'] < $b['bandwidth'] ) ? -1 : 1;
-		}
-
-		// We have no firm basis for a comparison, so consider them equal.
-		return 0;
-	}
-
-	/**
 	 * Call mediaWiki xml helper class to build media tag output from
 	 * supplied arrays.
 	 *
@@ -284,9 +220,24 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			return 'Error missing media source';
 		}
 
-		// Sort sources by bandwidth least to greatest (so that the default selection on resource
-		// constrained browsers (without js?) go with minimal source.)
-		usort( $mediaSources, [ $this, 'sortMediaByBandwidth' ] );
+		// Sort sources by width descending, then by bandwidth ascending.
+		usort( $mediaSources, static function( array $a, array $b ): int {
+			// Prefer the wider file.
+			if ( $a['width'] > $b['width'] ) {
+				return -1;
+			} elseif ( $a['width'] < $b['width'] ) {
+				return 1;
+			}
+			// Prefer the smaller file given they are the same width.
+			if ( isset( $a['bandwidth'] ) && isset( $b['bandwidth'] ) ) {
+				if ( $a['bandwidth'] < $b['bandwidth'] ) {
+					return -1;
+				} elseif ( $a['bandwidth'] > $b['bandwidth'] ) {
+					return 1;
+				}
+			}
+			return 0;
+		});
 
 		// We prefix some source attributes with data- to pass along to the javascript player
 		$prefixedSourceAttr = [
