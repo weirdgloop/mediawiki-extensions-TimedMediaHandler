@@ -15,6 +15,7 @@ abstract class TimedMediaMaintenance extends Maintenance {
 		$this->addOption( "start", "(re)start batch at the given file", false, true );
 		$this->addOption( "audio", "process audio files (defaults to all media types)" );
 		$this->addOption( "video", "process video files (defaults to all media types)" );
+		$this->addOption( "fourcc", "video codec to filter on (e.g. avc1)", false, true );
 		$this->addOption( "mime", "mime type to filter on (e.g. audio/midi)", false, true );
 		$this->requireExtension( 'TimedMediaHandler' );
 	}
@@ -97,6 +98,10 @@ abstract class TimedMediaMaintenance extends Maintenance {
 			$file = $localRepo->newFile( $title );
 			$handler = $file ? $file->getHandler() : null;
 			if ( $file && $handler && $handler instanceof TimedMediaHandler ) {
+				// WGL - Add way to filter on mp4 video codec.
+				if ( $this->hasOption( 'fourcc' ) && ( $file->getMetadataArray()['video']['fourcc'] ?? '' ) !== $this->getOption( 'fourcc' ) ) {
+					continue;
+				}
 				$this->processFile( $file );
 			}
 		}
