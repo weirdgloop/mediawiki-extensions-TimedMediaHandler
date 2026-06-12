@@ -310,7 +310,24 @@ class WebVideoTranscode {
 	 * @return string
 	 */
 	public static function getTranscodedUrlForFile( $file, $suffix = '' ) {
-		return $file->getTranscodedUrl( static::getTranscodeFileBaseName( $file, $suffix ) );
+		// WGL start - Add cachable file URLs.
+		$url = $file->getTranscodedUrl( static::getTranscodeFileBaseName( $file, $suffix ) );
+		// Skip cache breaker for non-gloop flavoured mediawiki.
+		if ( !MediaWikiServices::getInstance()->getMainConfig()->has( 'CachableFileUrls' ) ) {
+			return $url;
+		} elseif ( MediaWikiServices::getInstance()->getMainConfig()->get( 'CachableFileUrls' ) ) {
+			$transcodeEpoch = MediaWikiServices::getInstance()->getMainConfig()->get( 'TmhTranscodeEpoch' );
+			$fileName = $file->getTitle()->getDBkey();
+			// Prefer the timestamp of the transcode generation over the original file upload timestamp.
+			$timestamp = static::$transcodeState[$fileName][$suffix]['time_success'] ?? $file->getTimestamp();
+
+			if ( $timestamp ) {
+				$hash = substr( md5( $timestamp . $transcodeEpoch ), 0, 5 );
+				$url .= '?' . $hash;
+			}
+		}
+		return $url;
+		// WGL end.
 	}
 
 	/**

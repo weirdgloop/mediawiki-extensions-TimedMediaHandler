@@ -252,6 +252,11 @@
 			"public": true,
 			"value": 900
 		},
+		"TmhTranscodeEpoch": {
+			"description": "Set this to a timestamp to cache break transcoded file URLs.",
+			"public": true,
+			"value": "20030516000000"
+		},
 		"ParserTestMediaHandlers": {
 			"description": "MockOggHandler::class",
 			"public": true,
