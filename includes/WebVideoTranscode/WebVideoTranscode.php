@@ -884,6 +884,15 @@ class WebVideoTranscode {
 				$sourceCodec = $sourceCodecs ? strtolower( $sourceCodecs[0] ) : '';
 				return ( $sourceCodec !== $settings['audioCodec'] );
 			}
+			// Don't transcode h264 mp4 video files.
+			if ( $file->getExtension() === 'mp4' &&
+			     $handler->getMetadataType( $file ) === 'mp4' &&
+				 $settings['videoCodec'] === 'h264' &&
+				 $handler->getStreamTypes( $file )[0] === 'H.264'
+			) {
+				return false;
+			}
+
 			if ( static::isTargetLargerThanFile( $file, $settings['maxSize'] ?? '' ) ) {
 				// Are we the smallest enabled transcode for this type?
 				// Then go ahead and make a wee little transcode for compat.
