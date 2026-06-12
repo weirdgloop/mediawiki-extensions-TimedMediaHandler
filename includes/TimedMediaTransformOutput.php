@@ -239,6 +239,23 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			return 0;
 		});
 
+		// WGL - Only include one source for each codec.
+		if ( count( $mediaSources ) > 1 ) {
+			$trimmedSources = [];
+			$seenCodecs = [];
+			foreach ( $mediaSources as &$source ) {
+				$codecs = $source['videoCodec'] . '/' . $source['audioCodec'];
+				if ( in_array( $codecs, $seenCodecs ) ) {
+					continue;
+				}
+				if ( $codecs !== '' ) {
+					$seenCodecs[] = $codecs;
+				}
+				$trimmedSources[] = $source;
+			}
+			$mediaSources = $trimmedSources;
+		}
+
 		foreach ( $mediaSources as &$source ) {
 			$source = [
 				'src' => $source['src'],

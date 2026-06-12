@@ -785,20 +785,19 @@ class WebVideoTranscode {
 		$src = in_array( 'fullurl', $options, true ) ?
 			MediaWikiServices::getInstance()->getUrlUtils()->expand( $src ) :
 			$src;
-		$fields = [
+		return [
+			// HTML attributes
 			'src' => $src,
 			'type' => static::$derivativeSettings[ $transcodeKey ][ 'type' ],
+
+			// Internal attributes
+			'audioCodec' => static::$derivativeSettings[ $transcodeKey ][ 'audioCodec' ] ?? '',
+			'videoCodec' => static::$derivativeSettings[ $transcodeKey ][ 'videoCodec' ] ?? '',
+			'bandwidth' => static::getProjectedBitrate( $file, $transcodeKey ),
+			'height' => (int)$height,
+			'width' => (int)$width,
 			'transcodekey' => $transcodeKey,
-
-			// Add data attributes per emerging DASH / webTV adaptive streaming attributes
-			// eventually we will define a manifest xml entry point.
-			"width" => (int)$width,
-			"height" => (int)$height,
 		];
-
-		$fields['bandwidth'] = static::getProjectedBitrate( $file, $transcodeKey );
-
-		return $fields;
 	}
 
 	/**
