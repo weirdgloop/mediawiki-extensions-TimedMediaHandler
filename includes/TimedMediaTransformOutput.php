@@ -244,7 +244,7 @@ class TimedMediaTransformOutput extends MediaTransformOutput {
 			$trimmedSources = [];
 			$seenCodecs = [];
 			foreach ( $mediaSources as &$source ) {
-				$codecs = $source['videoCodec'] . '/' . $source['audioCodec'];
+				$codecs = ( $source['videoCodec'] ?? '' ) . ( $source['audioCodec'] ?? '' );
 				if ( in_array( $codecs, $seenCodecs ) ) {
 					continue;
 				}

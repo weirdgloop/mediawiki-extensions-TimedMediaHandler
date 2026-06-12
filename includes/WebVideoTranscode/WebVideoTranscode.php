@@ -887,8 +887,8 @@ class WebVideoTranscode {
 			// Don't transcode h264 mp4 video files.
 			if ( $file->getExtension() === 'mp4' &&
 			     $handler->getMetadataType( $file ) === 'mp4' &&
-				 $settings['videoCodec'] === 'h264' &&
-				 $handler->getStreamTypes( $file )[0] === 'H.264'
+				 ( $settings['videoCodec'] ?? '' ) === 'h264' &&
+				 ( $handler->getStreamTypes( $file )[0] ?? '' ) === 'H.264'
 			) {
 				return false;
 			}
