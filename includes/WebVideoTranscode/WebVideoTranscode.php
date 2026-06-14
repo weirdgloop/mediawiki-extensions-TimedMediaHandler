@@ -882,6 +882,10 @@ class WebVideoTranscode {
 			if ( $audio ) {
 				$sourceCodecs = $handler->getStreamTypes( $file );
 				$sourceCodec = $sourceCodecs ? strtolower( $sourceCodecs[0] ) : '';
+				// Don't transcode mp3 files.
+				if ( $sourceCodec === 'mp3' ) {
+					return false;
+				}
 				return ( $sourceCodec !== $settings['audioCodec'] );
 			}
 			// Don't transcode h264 mp4 video files.
