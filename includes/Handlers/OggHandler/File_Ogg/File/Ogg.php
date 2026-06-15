@@ -472,7 +472,10 @@ class File_Ogg
             }
             $page = $this->_decodePageHeader($pageData, $this_page_offset, $groupId);
             if ($page === false) {
-                throw new OggException("Cannot decode Ogg file: Invalid page at offset $this_page_offset", OGG_ERROR_UNDECODABLE);
+                // WGL - Stop decoding further rather than throw an exception if an invalid page is reached.
+                // Fixes parsing of some on-wiki ogg files that play fine in browsers and can be ffprobed fine.
+                break;
+                //throw new OggException("Cannot decode Ogg file: Invalid page at offset $this_page_offset", OGG_ERROR_UNDECODABLE);
             }
 
             // Keep track of multiplexed groups
