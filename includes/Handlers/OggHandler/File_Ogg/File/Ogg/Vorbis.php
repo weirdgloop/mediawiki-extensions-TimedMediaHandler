@@ -289,10 +289,11 @@ class File_Ogg_Vorbis extends File_Ogg_Media
     {
         $this->_decodeCommonHeader($packetType, $pageOffset);
         $this->_decodeBareCommentsHeader();
+        // WGL - Like TS says above, some encoders are broken though. Fixes ogg files from League of Legends album.
         // The framing bit MUST be set to mark the end of the comments header.
-        $framing_bit = unpack("Cdata", fread($this->_filePointer, 1));
-        if ($framing_bit['data'] != 1)
-            throw new OggException("Stream Undecodable", OGG_VORBIS_ERROR_UNDECODABLE);
+        // $framing_bit = unpack("Cdata", fread($this->_filePointer, 1));
+        // if ($framing_bit['data'] != 1)
+        //     throw new OggException("Stream Undecodable", OGG_VORBIS_ERROR_UNDECODABLE);
     }
 
     /**
