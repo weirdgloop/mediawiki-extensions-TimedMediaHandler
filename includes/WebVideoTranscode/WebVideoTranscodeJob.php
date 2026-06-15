@@ -343,9 +343,10 @@ class WebVideoTranscodeJob extends Job {
 					$this->setTranscodeError( $transcodeKey, $result->getWikiText() );
 					$status = false;
 				} else {
-					$bitrate = round(
+					// WGL - Fragmented MP4 files aren't supported by getID3, but we can still transcode them, provided we ignore the length.
+					$bitrate = $file->getLength() !== 0 ? round(
 						(int)( filesize( $this->getTargetEncodePath() ) / $file->getLength() ) * 8
-					);
+					) : 0;
 					// Wikimedia\restoreWarnings();
 					// Reconnect to the database...
 					$dbw = $this->lbFactory->getPrimaryDatabase();
