@@ -1,6 +1,6 @@
 {
 	"require": {
-		"james-heinrich/getid3": "~1.9.24"
+		"james-heinrich/getid3": "~1.9.25"
 	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "48.0.0",
@@ -25,6 +25,9 @@
 	"config": {
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"audit": {
+			"block-insecure": false
 		}
 	}
 }
