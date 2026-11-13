@@ -16,7 +16,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "media",
 	"requires": {
-		"MediaWiki": ">= 1.45"
+		"MediaWiki": ">= 1.47"
 	},
 	"APIModules": {
 		"transcodereset": {
@@ -57,7 +57,7 @@
 		}
 	},
 	"LogActionsHandlers": {
-		"timedmediahandler/resettranscode": "LogFormatter"
+		"timedmediahandler/resettranscode": "MediaWiki\\Logging\\LogFormatter"
 	},
 	"LogTypes": [
 		"timedmediahandler"
@@ -261,7 +261,9 @@
 			"description": "MockOggHandler::class",
 			"public": true,
 			"value": {
-				"application/ogg": "MockOggHandler"
+				"application/ogg": "MockOggHandler",
+				"audio/ogg": "MockOggHandler",
+				"video/ogg": "MockOggHandler"
 			}
 		},
 		"TmhFluidsynthLocation": {
@@ -303,6 +305,8 @@
 	},
 	"MediaHandlers": {
 		"application/ogg": "MediaWiki\\TimedMediaHandler\\Handlers\\OggHandler\\OggHandler",
+		"audio/ogg": "MediaWiki\\TimedMediaHandler\\Handlers\\OggHandler\\OggHandler",
+		"video/ogg": "MediaWiki\\TimedMediaHandler\\Handlers\\OggHandler\\OggHandler",
 		"audio/flac": "MediaWiki\\TimedMediaHandler\\Handlers\\FLACHandler\\FLACHandler",
 		"audio/midi": "MediaWiki\\TimedMediaHandler\\Handlers\\MIDIHandler\\MIDIHandler",
 		"audio/mp4": "MediaWiki\\TimedMediaHandler\\Handlers\\MP4Handler\\MP4Handler",

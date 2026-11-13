@@ -15,7 +15,6 @@ use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\TimedMediaHandler\WebVideoTranscode\WebVideoTranscode;
 use MediaWiki\Title\Title;
 use Wikimedia\ObjectCache\WANObjectCache;
-use Wikimedia\Rdbms\Database;
 use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\SelectQueryBuilder;
 
@@ -41,7 +40,11 @@ class SpecialTranscodeStatistics extends SpecialPage {
 		private readonly IConnectionProvider $dbProvider,
 		private readonly WANObjectCache $cache,
 	) {
-		parent::__construct( 'TranscodeStatistics', 'transcode-status' );
+		parent::__construct( 'TranscodeStatistics' );
+	}
+
+	public function getRestriction(): string {
+		return 'transcode-status';
 	}
 
 	/** @inheritDoc */
@@ -103,10 +106,8 @@ class SpecialTranscodeStatistics extends SpecialPage {
 		return $this->cache->getWithSetCallback(
 			$this->cache->makeKey( 'TimedMediaHandler-files', $state ),
 			$this->cache::TTL_MINUTE,
-			function ( $oldValue, &$ttl, array &$setOpts ) use ( $state, $limit, $fname ) {
+			function () use ( $state, $limit, $fname ) {
 				$dbr = $this->dbProvider->getReplicaDatabase();
-				$setOpts += Database::getCacheSetOptions( $dbr );
-
 				$files = [];
 				$res = $dbr->newSelectQueryBuilder()
 					->select( [ 'transcode_image_name', 'transcode_key' ] )
@@ -164,10 +165,8 @@ class SpecialTranscodeStatistics extends SpecialPage {
 		return $this->cache->getWithSetCallback(
 			$this->cache->makeKey( 'TimedMediaHandler-states' ),
 			$this->cache::TTL_MINUTE,
-			function ( $oldValue, &$ttl, array &$setOpts ) use ( $fname ) {
+			function () use ( $fname ) {
 				$dbr = $this->dbProvider->getReplicaDatabase();
-				$setOpts += Database::getCacheSetOptions( $dbr );
-
 				$allTranscodes = WebVideoTranscode::enabledTranscodes();
 
 				$states = [];
